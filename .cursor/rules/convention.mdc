@@ -1,0 +1,94 @@
+---
+description: 2026 커뮤니티 빌더 프로젝트 컨벤션
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: true
+---
+
+# 프로젝트 컨벤션
+
+## 기술 스택
+- Next.js 16 (App Router)
+- TypeScript (strict mode)
+- TailwindCSS 4
+- 모바일 퍼스트 웹 (토스 스타일 UI)
+
+## 아키텍처 원칙
+- Server Component 우선. `"use client"`는 인터랙션이 필요한 컴포넌트에만 사용
+- App Router의 Route Group 활용: `(main)`, `(auth)`, `(admin)`
+- 경로 별칭 `@/*`은 `./src/*`를 가리킴
+
+## 디렉토리 구조
+
+### 프론트엔드
+- `src/app/` — 페이지 및 레이아웃 (App Router)
+- `src/components/ui/` — 재사용 가능한 공통 UI 컴포넌트
+- `src/components/layout/` — Header, BottomNav 등 레이아웃 컴포넌트
+- `src/components/post/` — 게시글 관련 컴포넌트
+- `src/components/comment/` — 댓글 관련 컴포넌트
+- `src/hooks/` — 커스텀 React 훅
+
+### 백엔드 (Next.js 내장)
+- `src/app/api/` — Route Handler (HTTP 엔드포인트)
+  - `auth/` — 인증 관련 (`signup`, `login`, `logout`)
+  - `communities/` — 커뮤니티 CRUD
+  - `posts/` — 게시글 CRUD
+  - `users/` — 사용자 관리
+  - `health/` — 서버 상태 확인
+- `src/services/` — 비즈니스 로직 레이어 (DB 호출 담당, Supabase 연동 지점)
+
+### 공통
+- `src/lib/` — 유틸리티 (`utils.ts`, `api.ts` 등)
+- `src/types/` — TypeScript 타입 정의 (`.d.ts`)
+
+
+## 네이밍 규칙
+- 디렉토리: kebab-case (`my-component/`)
+- 컴포넌트 파일: PascalCase (`PostCard.tsx`)
+- 유틸리티/훅 파일: camelCase (`useSearch.ts`, `utils.ts`)
+- 타입 파일: `.d.ts` 확장자, 도메인별 분리 (`user.d.ts`, `post.d.ts`)
+- API Route Handler: `route.ts` (Next.js 규칙)
+- 서비스 파일: camelCase, 도메인별 (`user.ts`, `post.ts`)
+- 인터페이스/타입: PascalCase (`interface Post { ... }`)
+
+## 레이아웃 원칙
+- 모든 페이지는 반드시 라우트 그룹 `layout.tsx`를 통해 `AppShell`을 참조
+- `AppShell` (`@/components/layout/AppShell`): 앱 최대 너비(`--width-app: 640px`) + 중앙 정렬
+- PC: 좌우 여백 + 사이드 보더, 배경색(`--muted`)으로 분리감
+- 태블릿/모바일: 풀 너비 반응형, 사이드 보더 없음
+- 라우트 그룹별 레이아웃 구성:
+  - `(main)/layout.tsx` — Header + BottomNav (일반 사용자)
+  - `(auth)/layout.tsx` — 중앙 정렬 (로그인/회원가입)
+  - `(admin)/layout.tsx` — Header only (관리자)
+
+## 스타일링
+- TailwindCSS 유틸리티 클래스만 사용 (인라인 style 금지)
+- 모바일 퍼스트 반응형: 기본이 모바일, `sm:` → `md:` → `lg:` 순서로 확장
+- 디자인 토큰은 `globals.css`의 `@theme` 블록에서 관리
+- 앱 최대 너비: `--width-app` 테마 변수 (`max-w-[var(--width-app)]`)
+- `cn()` 유틸리티로 조건부 클래스 병합 (`@/lib/utils`)
+
+## 타입
+- `interface` 우선 사용 (`type`은 유니온/인터섹션 등 필요시에만)
+- 타입 정의는 `src/types/` 폴더에 `.d.ts` 파일로 관리
+- 도메인별 분리: `user.d.ts`, `community.d.ts`, `post.d.ts`, `comment.d.ts`
+- `index.d.ts`에서 배럴 re-export
+- 사용 시: `import type { Post } from "@/types"`
+- 컴포넌트 Props는 해당 컴포넌트 파일 내에 정의
+
+## 백엔드 규칙
+- Route Handler (`src/app/api/`)는 요청 파싱·응답만 담당 (얇은 레이어)
+- 비즈니스 로직은 `src/services/`에 분리
+- API 응답은 `successResponse()`, `errorResponse()` 헬퍼 사용 (`@/lib/api`)
+- 응답 형식: `{ success: true, data: T }` 또는 `{ success: false, error: string }`
+- DB는 Supabase 연동 예정, 현재 서비스 레이어에 스텁 함수로 준비
+
+## 역할 구분
+- 관리자(`admin`): `(admin)/` 라우트 그룹으로 분리
+- 회원(`member`): `(main)/` 라우트 그룹 사용
+- 인증은 추후 구현 예정, 현재 mock 데이터 사용
+
+## 기타
+- 한국어(ko) 기본 언어
+- 응답은 한국어로
