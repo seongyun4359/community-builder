@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "GmarketSans";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GmarketSans";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GmarketSans";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #191f28;
@@ -30,7 +54,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --radius-base: var(--radius);
-  --font-sans: var(--font-pretendard);
+  --font-sans: "GmarketSans";
   --width-app: 640px;
 }
 
@@ -51,8 +75,8 @@
 body {
   background: var(--muted);
   color: var(--foreground);
-  font-family: var(--font-pretendard), "Pretendard Variable", -apple-system,
-    BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: "GmarketSans", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
