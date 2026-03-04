@@ -12,7 +12,14 @@ alwaysApply: true
 - Next.js 16 (App Router)
 - TypeScript (strict mode)
 - TailwindCSS 4
+- MUI (Material UI) — `@mui/material` + Emotion
 - 모바일 퍼스트 웹 (토스 스타일 UI)
+
+## 폰트
+- 본문: Pretendard Variable (CDN `<link>` 로드)
+- 제목(h1~h6): GmarketSans (CDN `@font-face` 로드)
+- MUI `theme.ts`에도 동일 폰트 설정 적용
+- Tailwind `--font-sans`: Pretendard / `--font-heading`: GmarketSans
 
 ## 아키텍처 원칙
 - Server Component 우선. `"use client"`는 인터랙션이 필요한 컴포넌트에만 사용

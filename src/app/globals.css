@@ -54,7 +54,8 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --radius-base: var(--radius);
-  --font-sans: "GmarketSans";
+  --font-sans: "Pretendard Variable", "Pretendard", sans-serif;
+  --font-heading: "GmarketSans", sans-serif;
   --width-app: 640px;
 }
 
@@ -75,10 +76,15 @@
 body {
   background: var(--muted);
   color: var(--foreground);
-  font-family: "GmarketSans", -apple-system, BlinkMacSystemFont, system-ui,
-    sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", -apple-system,
+    BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "GmarketSans", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
 }
 
 @media (max-width: 640px) {

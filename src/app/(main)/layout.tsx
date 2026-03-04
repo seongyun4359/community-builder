@@ -10,7 +10,7 @@ export default function MainLayout({
   return (
     <AppShell>
       <Header />
-      <main className="flex-1 pb-20 md:pb-0">
+      <main className="flex-1 pb-20">
         {children}
       </main>
       <BottomNav />
