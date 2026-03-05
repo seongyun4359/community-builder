@@ -1,4 +1,4 @@
-import type { User, SocialProvider, SignupProfileForm } from "@/types";
+import type { User, SignupProfileForm } from "@/types";
 
 const STORAGE_KEY = "community-builder-auth";
 
@@ -12,7 +12,7 @@ export function getStoredUser(): User | null {
   }
 }
 
-function storeUser(user: User | null) {
+export function storeUser(user: User | null) {
   if (typeof window === "undefined") return;
   if (user) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
@@ -21,20 +21,24 @@ function storeUser(user: User | null) {
   }
 }
 
-export async function mockSocialLogin(provider: SocialProvider): Promise<User> {
-  await new Promise((r) => setTimeout(r, 500));
+export interface KakaoCallbackData {
+  id: string;
+  email: string;
+  nickname: string;
+  profileImage?: string;
+  provider: string;
+}
 
-  const mockEmails: Record<SocialProvider, string> = {
-    google: "admin@gmail.com",
-    kakao: "admin@kakao.com",
-  };
+export function saveKakaoUser(data: KakaoCallbackData): User {
+  const existing = getStoredUser();
 
   const user: User = {
-    id: crypto.randomUUID(),
-    email: mockEmails[provider],
-    nickname: "",
-    role: "super_admin",
-    createdAt: new Date().toISOString(),
+    id: existing?.id === data.id ? existing.id : data.id,
+    email: data.email,
+    nickname: existing?.nickname || data.nickname,
+    profileImage: existing?.profileImage || data.profileImage,
+    role: existing?.role || "super_admin",
+    createdAt: existing?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
@@ -42,9 +46,7 @@ export async function mockSocialLogin(provider: SocialProvider): Promise<User> {
   return user;
 }
 
-export async function mockUpdateProfile(form: SignupProfileForm): Promise<User> {
-  await new Promise((r) => setTimeout(r, 300));
-
+export async function updateProfile(form: SignupProfileForm): Promise<User> {
   const current = getStoredUser();
   if (!current) throw new Error("로그인이 필요합니다.");
 
@@ -59,6 +61,10 @@ export async function mockUpdateProfile(form: SignupProfileForm): Promise<User> 
   return updated;
 }
 
-export function mockLogout() {
+export function logout() {
   storeUser(null);
+}
+
+export function getKakaoLoginUrl(mode: "login" | "signup" = "login"): string {
+  return `/api/auth/kakao?mode=${mode}`;
 }

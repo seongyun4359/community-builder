@@ -1,8 +1,14 @@
 "use client";
 
 import { createContext, useCallback, useEffect, useState } from "react";
-import type { User, AuthContextValue, SocialProvider, SignupProfileForm } from "@/types";
-import { getStoredUser, mockSocialLogin, mockUpdateProfile, mockLogout } from "@/lib/auth";
+import type { User, AuthContextValue, SignupProfileForm } from "@/types";
+import {
+  getStoredUser,
+  saveKakaoUser,
+  updateProfile as updateProfileFn,
+  logout as logoutFn,
+  type KakaoCallbackData,
+} from "@/lib/auth";
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -15,25 +21,20 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     setIsLoading(false);
   }, []);
 
-  const loginWithSocial = useCallback(async (provider: SocialProvider) => {
-    setIsLoading(true);
-    try {
-      const loggedInUser = await mockSocialLogin(provider);
-      setUser(loggedInUser);
-    } finally {
-      setIsLoading(false);
-    }
+  const setUserFromKakao = useCallback((data: KakaoCallbackData) => {
+    const saved = saveKakaoUser(data);
+    setUser(saved);
   }, []);
 
   const logout = useCallback(() => {
-    mockLogout();
+    logoutFn();
     setUser(null);
   }, []);
 
   const updateProfile = useCallback(async (form: SignupProfileForm) => {
     setIsLoading(true);
     try {
-      const updated = await mockUpdateProfile(form);
+      const updated = await updateProfileFn(form);
       setUser(updated);
     } finally {
       setIsLoading(false);
@@ -43,7 +44,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, loginWithSocial, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, setUserFromKakao, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

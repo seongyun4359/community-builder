@@ -1,19 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Divider from "@mui/material/Divider";
 import SocialLoginButton from "@/components/ui/SocialLoginButton";
-import { useAuth } from "@/hooks/useAuth";
-import type { SocialProvider } from "@/types";
+import { getKakaoLoginUrl } from "@/lib/auth";
 
 export default function SignupPage() {
-  const router = useRouter();
-  const { loginWithSocial, isLoading } = useAuth();
-
-  const handleSocialSignup = async (provider: SocialProvider) => {
-    await loginWithSocial(provider);
-    router.push("/signup/profile");
+  const handleKakaoSignup = () => {
+    window.location.href = getKakaoLoginUrl("signup");
   };
 
   return (
@@ -27,15 +21,17 @@ export default function SignupPage() {
 
       <div className="flex flex-col gap-3">
         <SocialLoginButton
-          provider="google"
-          onClick={() => handleSocialSignup("google")}
-          disabled={isLoading}
+          provider="kakao"
+          onClick={handleKakaoSignup}
         />
         <SocialLoginButton
-          provider="kakao"
-          onClick={() => handleSocialSignup("kakao")}
-          disabled={isLoading}
+          provider="google"
+          onClick={() => {}}
+          disabled
         />
+        <p className="text-center text-xs text-muted-foreground">
+          Google 로그인은 준비 중입니다
+        </p>
       </div>
 
       <Divider sx={{ fontSize: "0.75rem", color: "var(--muted-foreground)" }}>
