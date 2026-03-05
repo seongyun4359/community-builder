@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -12,6 +13,14 @@ export default function ProfileSetupPage() {
   const { user, updateProfile, isLoading } = useAuth();
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (user.nickname) setNickname(user.nickname);
+    }
+  }, [user]);
+
+  const profileImage = user?.profileImage;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +36,7 @@ export default function ProfileSetupPage() {
       return;
     }
 
-    await updateProfile({ nickname: trimmed });
+    await updateProfile({ nickname: trimmed, profileImage: profileImage });
     router.push("/");
   };
 
@@ -40,17 +49,33 @@ export default function ProfileSetupPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6">
-        <Avatar
-          sx={{
-            width: 80,
-            height: 80,
-            fontSize: "2rem",
-            bgcolor: "var(--primary)",
-          }}
-        >
-          {nickname ? nickname[0].toUpperCase() : user?.email?.[0]?.toUpperCase() ?? "?"}
-        </Avatar>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center gap-6"
+      >
+        {profileImage ? (
+          <Image
+            src={profileImage}
+            alt="프로필"
+            width={80}
+            height={80}
+            className="rounded-full object-cover"
+            style={{ width: 80, height: 80 }}
+          />
+        ) : (
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+              fontSize: "2rem",
+              bgcolor: "var(--primary)",
+            }}
+          >
+            {nickname?.[0]?.toUpperCase() ??
+              user?.email?.[0]?.toUpperCase() ??
+              "?"}
+          </Avatar>
+        )}
 
         <div className="w-full">
           <Input
