@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
-  href: string;
+  path: string;
   label: string;
   icon: React.ReactNode;
 }
 
-const navItems: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   {
-    href: "/",
+    path: "",
     label: "홈",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -22,7 +22,7 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href: "/boards",
+    path: "/boards",
     label: "게시판",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href: "/notifications",
+    path: "/notifications",
     label: "알림",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -44,7 +44,7 @@ const navItems: NavItem[] = [
     ),
   },
   {
-    href: "/mypage",
+    path: "/mypage",
     label: "마이",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -55,18 +55,26 @@ const navItems: NavItem[] = [
   },
 ];
 
-export default function BottomNav() {
+interface BottomNavProps {
+  basePath?: string;
+}
+
+export default function BottomNav({ basePath = "" }: BottomNavProps) {
   const pathname = usePathname();
 
   return (
     <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[var(--width-app)] -translate-x-1/2 border-t border-border bg-background/95 backdrop-blur-sm">
       <div className="flex h-16 items-center justify-around">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+        {NAV_ITEMS.map((item) => {
+          const href = basePath + item.path || "/";
+          const isActive =
+            item.path === ""
+              ? pathname === (basePath || "/")
+              : pathname.startsWith(basePath + item.path);
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={item.path}
+              href={href}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-1 text-xs transition-colors",
                 isActive

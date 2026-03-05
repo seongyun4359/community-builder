@@ -13,6 +13,7 @@ alwaysApply: true
 - TypeScript (strict mode)
 - TailwindCSS 4
 - MUI (Material UI) — `@mui/material` + Emotion
+- MongoDB (Atlas) + Mongoose — 데이터 저장
 - 모바일 퍼스트 웹 (토스 스타일 UI)
 
 ## 폰트
@@ -45,8 +46,12 @@ alwaysApply: true
   - `health/` — 서버 상태 확인
 - `src/services/` — 비즈니스 로직 레이어 (DB 호출 담당, Supabase 연동 지점)
 
+### 데이터 레이어
+- `src/models/` — Mongoose 스키마/모델 (`User.ts`, `Community.ts`, `Board.ts`)
+- `src/lib/mongodb.ts` — DB 연결 유틸리티 (커넥션 캐싱)
+
 ### 공통
-- `src/lib/` — 유틸리티 (`utils.ts`, `api.ts` 등)
+- `src/lib/` — 유틸리티 (`utils.ts`, `api-utils.ts` 등)
 - `src/types/` — TypeScript 타입 정의 (`.d.ts`)
 
 
@@ -87,9 +92,11 @@ alwaysApply: true
 ## 백엔드 규칙
 - Route Handler (`src/app/api/`)는 요청 파싱·응답만 담당 (얇은 레이어)
 - 비즈니스 로직은 `src/services/`에 분리
-- API 응답은 `successResponse()`, `errorResponse()` 헬퍼 사용 (`@/lib/api`)
+- API 응답은 `successResponse()`, `errorResponse()` 헬퍼 사용 (`@/lib/api-utils`)
 - 응답 형식: `{ success: true, data: T }` 또는 `{ success: false, error: string }`
-- DB는 Supabase 연동 예정, 현재 서비스 레이어에 스텁 함수로 준비
+- DB: MongoDB Atlas + Mongoose
+- `connectDB()` 호출 후 Model 사용 (매 API Route 시작부에 호출)
+- Model은 `src/models/`에서 import (`UserModel`, `CommunityModel`, `BoardModel`)
 
 ## 역할 구분
 - 관리자(`admin`): `(admin)/` 라우트 그룹으로 분리

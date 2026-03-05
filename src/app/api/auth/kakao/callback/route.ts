@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/mongodb";
+import { UserModel } from "@/models";
 
 interface KakaoTokenResponse {
   access_token: string;
@@ -64,11 +66,36 @@ export async function GET(request: NextRequest) {
 
     const kakaoUser: KakaoUserResponse = await userRes.json();
 
+    await connectDB();
+
+    const kakaoId = String(kakaoUser.id);
+    const email = kakaoUser.kakao_account?.email || `kakao_${kakaoId}@kakao.com`;
+    const nickname = kakaoUser.kakao_account?.profile?.nickname || "";
+    const profileImage = kakaoUser.kakao_account?.profile?.profile_image_url || "";
+
+    let dbUser = await UserModel.findOne({ provider: "kakao", providerId: kakaoId });
+
+    if (dbUser) {
+      if (profileImage && !dbUser.profileImage) {
+        dbUser.profileImage = profileImage;
+        await dbUser.save();
+      }
+    } else {
+      dbUser = await UserModel.create({
+        email,
+        nickname,
+        profileImage,
+        role: "super_admin",
+        provider: "kakao",
+        providerId: kakaoId,
+      });
+    }
+
     const userData = {
-      id: String(kakaoUser.id),
-      email: kakaoUser.kakao_account?.email || `kakao_${kakaoUser.id}@kakao.com`,
-      nickname: kakaoUser.kakao_account?.profile?.nickname || "",
-      profileImage: kakaoUser.kakao_account?.profile?.profile_image_url || "",
+      id: dbUser._id.toString(),
+      email: dbUser.email,
+      nickname: dbUser.nickname,
+      profileImage: dbUser.profileImage || profileImage,
       provider: "kakao",
     };
 
