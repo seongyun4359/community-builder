@@ -36,7 +36,7 @@ export function saveKakaoUser(data: KakaoCallbackData): User {
     id: existing?.id === data.id ? existing.id : data.id,
     email: data.email,
     nickname: existing?.nickname || data.nickname,
-    profileImage: existing?.profileImage || data.profileImage,
+    profileImage: data.profileImage || existing?.profileImage,
     role: existing?.role || "super_admin",
     createdAt: existing?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),

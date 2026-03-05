@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -10,8 +11,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="flex h-14 items-center justify-between px-4">
-        <Link href="/" className="text-lg font-bold text-foreground">
-          커뮤니티 빌더
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="커뮤니티 빌더" width={28} height={28} />
+          <span className="text-lg font-bold text-foreground">커뮤니티 빌더</span>
         </Link>
         <nav className="flex items-center gap-2">
           {isLoading ? (
