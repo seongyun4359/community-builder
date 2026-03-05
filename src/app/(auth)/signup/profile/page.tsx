@@ -7,10 +7,12 @@ import Avatar from "@mui/material/Avatar";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 export default function ProfileSetupPage() {
   const router = useRouter();
   const { user, updateProfile, isLoading } = useAuth();
+  const toast = useToast();
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
 
@@ -37,6 +39,7 @@ export default function ProfileSetupPage() {
     }
 
     await updateProfile({ nickname: trimmed, profileImage: profileImage });
+    toast.success(`${trimmed}님, 환영합니다!`);
     router.push("/");
   };
 
