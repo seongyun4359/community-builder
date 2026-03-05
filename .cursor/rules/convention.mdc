@@ -23,6 +23,16 @@ alwaysApply: true
 - Tailwind `--font-sans`: Pretendard / `--font-heading`: GmarketSans
 
 ## 아키텍처 원칙
+
+### API-First (React Native 대응)
+- **모든 비즈니스 로직은 반드시 API Route를 거쳐야 함** — 프론트에서 DB 직접 접근 금지
+- API는 플랫폼 무관하게 동작해야 함 (Next.js 전용 기능에 의존하지 않는 RESTful JSON 응답)
+- `src/services/` (프론트 서비스 레이어)는 `fetch` 래퍼로만 구성 — RN에서도 동일 API 호출 가능
+- `src/types/` 타입은 프론트/백엔드/RN 모두 공유 가능하도록 플랫폼 독립적으로 정의
+- 인증 토큰 기반 설계 — localStorage 캐시는 웹 전용, API 자체는 토큰(추후 JWT)으로 인증
+- 컴포넌트 내에서 API URL은 `src/services/`를 통해서만 접근 (직접 fetch 금지)
+
+### 기본 원칙
 - Server Component 우선. `"use client"`는 인터랙션이 필요한 컴포넌트에만 사용
 - App Router의 Route Group 활용: `(main)`, `(auth)`, `(admin)`
 - 경로 별칭 `@/*`은 `./src/*`를 가리킴
@@ -37,14 +47,14 @@ alwaysApply: true
 - `src/components/comment/` — 댓글 관련 컴포넌트
 - `src/hooks/` — 커스텀 React 훅
 
-### 백엔드 (Next.js 내장)
-- `src/app/api/` — Route Handler (HTTP 엔드포인트)
+### 백엔드 (Next.js 내장, RN에서도 동일 API 사용)
+- `src/app/api/` — Route Handler (HTTP 엔드포인트, RESTful)
   - `auth/` — 인증 관련 (`signup`, `login`, `logout`)
   - `communities/` — 커뮤니티 CRUD
   - `posts/` — 게시글 CRUD
   - `users/` — 사용자 관리
   - `health/` — 서버 상태 확인
-- `src/services/` — 비즈니스 로직 레이어 (DB 호출 담당, Supabase 연동 지점)
+- `src/services/` — 프론트 fetch 래퍼 (웹/RN 공용 가능한 API 호출 레이어)
 
 ### 데이터 레이어
 - `src/models/` — Mongoose 스키마/모델 (`User.ts`, `Community.ts`, `Board.ts`)
@@ -91,12 +101,14 @@ alwaysApply: true
 
 ## 백엔드 규칙
 - Route Handler (`src/app/api/`)는 요청 파싱·응답만 담당 (얇은 레이어)
-- 비즈니스 로직은 `src/services/`에 분리
+- 비즈니스 로직은 Route Handler 내부 또는 별도 서버 서비스로 분리
 - API 응답은 `successResponse()`, `errorResponse()` 헬퍼 사용 (`@/lib/api-utils`)
 - 응답 형식: `{ success: true, data: T }` 또는 `{ success: false, error: string }`
 - DB: MongoDB Atlas + Mongoose
 - `connectDB()` 호출 후 Model 사용 (매 API Route 시작부에 호출)
 - Model은 `src/models/`에서 import (`UserModel`, `CommunityModel`, `BoardModel`)
+- API는 플랫폼 독립적으로 설계 — Next.js 전용 기능(`cookies()`, `headers()` 등)에 의존 최소화
+- 향후 RN 앱에서 동일 API 서버를 호출할 수 있도록 RESTful 원칙 준수
 
 ## 역할 구분
 - 관리자(`admin`): `(admin)/` 라우트 그룹으로 분리

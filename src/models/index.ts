@@ -1,7 +1,17 @@
 export { default as UserModel } from "./User";
 export { default as CommunityModel } from "./Community";
 export { default as BoardModel } from "./Board";
+export { default as PostModel } from "./Post";
+export { default as CommentModel } from "./Comment";
+export { default as MemberModel } from "./Member";
+export { default as EventModel } from "./Event";
+export { default as NotificationModel } from "./Notification";
 
 export type { IUser } from "./User";
 export type { ICommunity } from "./Community";
 export type { IBoard } from "./Board";
+export type { IPost } from "./Post";
+export type { IComment } from "./Comment";
+export type { IMember } from "./Member";
+export type { IEvent } from "./Event";
+export type { INotification } from "./Notification";

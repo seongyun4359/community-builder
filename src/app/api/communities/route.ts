@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { CommunityModel, BoardModel } from "@/models";
+import { CommunityModel, BoardModel, MemberModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
 
 export async function GET(request: NextRequest) {
@@ -55,6 +55,12 @@ export async function POST(request: NextRequest) {
       { communityId: community._id, name: "공지사항", type: "notice", order: 0 },
       { communityId: community._id, name: "자유게시판", type: "general", order: 1 },
     ]);
+
+    await MemberModel.create({
+      communityId: community._id.toString(),
+      userId: ownerId,
+      role: "super_admin",
+    });
 
     return successResponse(community, 201);
   } catch (e) {
