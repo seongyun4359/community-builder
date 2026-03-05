@@ -4,9 +4,16 @@ import Link from "next/link";
 import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 export default function Header() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const toast = useToast();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("로그아웃되었습니다.");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -31,7 +38,7 @@ export default function Header() {
                   bgcolor: "var(--primary)",
                   cursor: "pointer",
                 }}
-                onClick={logout}
+                onClick={handleLogout}
               >
                 {user.nickname?.[0]?.toUpperCase() ?? user.email[0].toUpperCase()}
               </Avatar>

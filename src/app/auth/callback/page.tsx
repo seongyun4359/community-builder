@@ -3,12 +3,14 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import CircularProgress from "@mui/material/CircularProgress";
 
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUserFromKakao } = useAuth();
+  const toast = useToast();
 
   useEffect(() => {
     const userParam = searchParams.get("user");
@@ -26,12 +28,13 @@ function CallbackContent() {
       if (isSignup || !kakaoData.nickname) {
         router.replace("/signup/profile");
       } else {
+        toast.success("로그인되었습니다.");
         router.replace("/");
       }
     } catch {
       router.replace("/login?error=invalid_data");
     }
-  }, [searchParams, router, setUserFromKakao]);
+  }, [searchParams, router, setUserFromKakao, toast]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center">

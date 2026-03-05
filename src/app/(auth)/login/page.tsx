@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Divider from "@mui/material/Divider";
-import Alert from "@mui/material/Alert";
 import SocialLoginButton from "@/components/ui/SocialLoginButton";
 import { getKakaoLoginUrl } from "@/lib/auth";
+import { useToast } from "@/hooks/useToast";
 
 const errorMessages: Record<string, string> = {
   kakao_auth_failed: "카카오 로그인이 취소되었습니다.",
@@ -19,7 +19,14 @@ const errorMessages: Record<string, string> = {
 
 function LoginContent() {
   const searchParams = useSearchParams();
+  const toast = useToast();
   const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (error) {
+      toast.error(errorMessages[error] || "알 수 없는 오류가 발생했습니다.");
+    }
+  }, [error, toast]);
 
   const handleKakaoLogin = () => {
     window.location.href = getKakaoLoginUrl("login");
@@ -33,12 +40,6 @@ function LoginContent() {
           다시 오신 것을 환영합니다
         </p>
       </div>
-
-      {error && (
-        <Alert severity="error" sx={{ borderRadius: "12px" }}>
-          {errorMessages[error] || "알 수 없는 오류가 발생했습니다."}
-        </Alert>
-      )}
 
       <div className="flex flex-col gap-3">
         <SocialLoginButton
