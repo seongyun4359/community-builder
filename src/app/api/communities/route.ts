@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
       .lean();
 
     return successResponse(communities);
-  } catch {
+  } catch (e) {
+    console.error("[GET /api/communities]", e);
     return errorResponse("서버 오류가 발생했습니다.", 500);
   }
 }
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest) {
     ]);
 
     return successResponse(community, 201);
-  } catch {
+  } catch (e) {
+    console.error("[POST /api/communities]", e);
     return errorResponse("서버 오류가 발생했습니다.", 500);
   }
 }

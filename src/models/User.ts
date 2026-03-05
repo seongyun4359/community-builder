@@ -22,7 +22,7 @@ const UserSchema = new Schema<IUser>(
       default: "member",
     },
     provider: { type: String, enum: ["kakao", "google"], required: true },
-    providerId: { type: String, required: true, unique: true },
+    providerId: { type: String, required: true },
   },
   { timestamps: true }
 );

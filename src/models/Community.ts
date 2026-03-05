@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document, type Types } from "mongoose";
+import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ICommunity extends Document {
   slug: string;
@@ -6,7 +6,7 @@ export interface ICommunity extends Document {
   description: string;
   theme: "default" | "minimal" | "vibrant" | "dark" | "nature";
   logoUrl?: string;
-  ownerId: Types.ObjectId;
+  ownerId: string;
   memberCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -23,13 +23,12 @@ const CommunitySchema = new Schema<ICommunity>(
       default: "default",
     },
     logoUrl: { type: String },
-    ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    ownerId: { type: String, required: true },
     memberCount: { type: Number, default: 1 },
   },
   { timestamps: true }
 );
 
 CommunitySchema.index({ ownerId: 1 });
-CommunitySchema.index({ slug: 1 }, { unique: true });
 
 export default mongoose.models.Community || mongoose.model<ICommunity>("Community", CommunitySchema);
