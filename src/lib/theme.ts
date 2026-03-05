@@ -20,7 +20,8 @@ const theme = createTheme({
     h6: { fontFamily: "GmarketSans, sans-serif" },
   },
   palette: {
-    primary: { main: "#3182f6" },
+    primary: { main: "#00BEFF", contrastText: "#ffffff" },
+    secondary: { main: "#ECE1FF", contrastText: "#191f28" },
     error: { main: "#f04452" },
     success: { main: "#00c471" },
     warning: { main: "#ff9f00" },
