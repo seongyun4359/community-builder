@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Avatar from "@mui/material/Avatar";
@@ -7,13 +8,22 @@ import { ChevronRight, FileText, MessageSquare, Settings, LogOut } from "lucide-
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useToast } from "@/hooks/useToast";
+import { fetchPosts } from "@/services/post";
 
 export default function MyPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const community = useCommunity();
   const toast = useToast();
+  const [postCount, setPostCount] = useState(0);
 
   const isOwner = user?.id === community.ownerId;
+
+  useEffect(() => {
+    if (!user) return;
+    fetchPosts(community.slug, { authorId: user.id, limit: 1 })
+      .then((r) => setPostCount(r.total))
+      .catch(() => {});
+  }, [community.slug, user]);
 
   const handleLogout = () => {
     logout();
@@ -24,10 +34,7 @@ export default function MyPage() {
     return (
       <div className="flex flex-col items-center gap-4 px-4 py-16">
         <p className="text-sm text-muted-foreground">로그인이 필요합니다</p>
-        <Link
-          href="/login"
-          className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
-        >
+        <Link href="/login" className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground">
           로그인
         </Link>
       </div>
@@ -38,14 +45,8 @@ export default function MyPage() {
     <div className="flex flex-col gap-6 px-4 py-6">
       <div className="flex items-center gap-4">
         {user.profileImage ? (
-          <Image
-            src={user.profileImage}
-            alt="프로필"
-            width={56}
-            height={56}
-            className="rounded-full object-cover"
-            style={{ width: 56, height: 56 }}
-          />
+          <Image src={user.profileImage} alt="프로필" width={56} height={56}
+            className="rounded-full object-cover" style={{ width: 56, height: 56 }} />
         ) : (
           <Avatar sx={{ width: 56, height: 56, fontSize: "1.25rem", bgcolor: "var(--primary)" }}>
             {user.nickname?.[0]?.toUpperCase() ?? user.email[0].toUpperCase()}
@@ -64,7 +65,7 @@ export default function MyPage() {
 
       <section className="flex flex-col gap-1">
         <h2 className="mb-1 text-xs font-semibold text-muted-foreground">활동</h2>
-        <MenuRow icon={FileText} label="내가 쓴 게시글" href={`/${community.slug}/mypage`} />
+        <MenuRow icon={FileText} label={`내가 쓴 게시글 (${postCount})`} href={`/${community.slug}/mypage`} />
         <MenuRow icon={MessageSquare} label="내가 쓴 댓글" href={`/${community.slug}/mypage`} />
       </section>
 
@@ -73,10 +74,8 @@ export default function MyPage() {
         {isOwner && (
           <MenuRow icon={Settings} label="커뮤니티 관리" href={`/${community.slug}/admin`} />
         )}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted"
-        >
+        <button onClick={handleLogout}
+          className="flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted">
           <LogOut className="h-5 w-5 text-destructive" />
           <span className="flex-1 text-sm font-medium text-destructive">로그아웃</span>
         </button>
@@ -87,10 +86,7 @@ export default function MyPage() {
 
 function MenuRow({ icon: Icon, label, href }: { icon: React.ElementType; label: string; href: string }) {
   return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted"
-    >
+    <Link href={href} className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted">
       <Icon className="h-5 w-5 text-muted-foreground" />
       <span className="flex-1 text-sm font-medium">{label}</span>
       <ChevronRight className="h-4 w-4 text-muted-foreground" />
