@@ -1,4 +1,5 @@
 import type { User } from "./user";
+import type { KakaoCallbackData } from "@/lib/auth";
 
 export type SocialProvider = "google" | "kakao";
 
@@ -14,7 +15,7 @@ export interface SignupProfileForm {
 }
 
 export interface AuthContextValue extends AuthState {
-  loginWithSocial: (provider: SocialProvider) => Promise<void>;
+  setUserFromKakao: (data: KakaoCallbackData) => void;
   logout: () => void;
   updateProfile: (form: SignupProfileForm) => Promise<void>;
 }
