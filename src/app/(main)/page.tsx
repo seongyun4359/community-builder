@@ -1,7 +1,23 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Plus, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { fetchCommunitiesByOwner } from "@/services/community";
+import type { Community } from "@/types";
 
 export default function HomePage() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [myCommunities, setMyCommunities] = useState<Community[]>([]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchCommunitiesByOwner(user.id).then(setMyCommunities).catch(() => {});
+    }
+  }, [isAuthenticated, user]);
+
   return (
     <div className="flex flex-col">
       <section className="relative flex flex-col items-center gap-6 px-4 py-16 text-center">
@@ -26,12 +42,22 @@ export default function HomePage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link
-            href="/signup"
-            className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            시작하기
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/create"
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              커뮤니티 만들기
+            </Link>
+          ) : (
+            <Link
+              href="/signup"
+              className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              시작하기
+            </Link>
+          )}
           <Link
             href="/boards"
             className="rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
@@ -40,6 +66,48 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {isAuthenticated && myCommunities.length > 0 && (
+        <section className="flex flex-col gap-3 px-4 py-6">
+          <h2 className="text-base font-bold">내 커뮤니티</h2>
+          <div className="flex flex-col gap-2">
+            {myCommunities.map((c) => (
+              <Link
+                key={c.id}
+                href={`/${c.slug}`}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted"
+              >
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-white"
+                  style={{ backgroundColor: "var(--primary)" }}
+                >
+                  {c.name[0]}
+                </div>
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-sm font-semibold">{c.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    /{c.slug} &middot; 멤버 {c.memberCount}명
+                  </span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!isLoading && isAuthenticated && myCommunities.length === 0 && (
+        <section className="mx-4 mb-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">아직 만든 커뮤니티가 없어요</p>
+          <Link
+            href="/create"
+            className="flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+            첫 커뮤니티 만들기
+          </Link>
+        </section>
+      )}
 
       <section className="grid gap-4 px-4 py-8 sm:grid-cols-3">
         <FeatureCard
