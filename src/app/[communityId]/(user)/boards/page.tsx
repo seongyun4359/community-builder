@@ -53,7 +53,7 @@ export default function BoardsPage() {
                 <span className="text-sm font-semibold">{board.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {board.type === "notice" ? "공지사항" : board.type === "gallery" ? "갤러리" : "일반 게시판"}
-                  {" · "}게시글 0개
+                  {" · "}게시글 {(board as Board & { postCount?: number }).postCount ?? 0}개
                 </span>
               </div>
             </Link>
