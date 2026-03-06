@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useEffect, useState } from "react";
 import type { User, AuthContextValue, SignupProfileForm } from "@/types";
-import { getStoredUser, storeUser, type KakaoCallbackData } from "@/lib/auth";
 import { updateUserProfile } from "@/services/user";
+import { fetchMe, logoutSession } from "@/services/auth";
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -12,27 +12,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setUser(getStoredUser());
-    setIsLoading(false);
-  }, []);
-
-  const setUserFromKakao = useCallback((data: KakaoCallbackData) => {
-    const userData: User = {
-      id: data.id,
-      email: data.email,
-      nickname: data.nickname,
-      profileImage: data.profileImage,
-      role: "super_admin",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    storeUser(userData);
-    setUser(userData);
+    fetchMe()
+      .then((me) => setUser(me))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const logout = useCallback(() => {
-    storeUser(null);
-    setUser(null);
+    logoutSession()
+      .catch(() => {})
+      .finally(() => setUser(null));
   }, []);
 
   const updateProfile = useCallback(async (form: SignupProfileForm) => {
@@ -40,7 +28,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     setIsLoading(true);
     try {
       const updated = await updateUserProfile(user.id, form);
-      storeUser(updated);
       setUser(updated);
     } finally {
       setIsLoading(false);
@@ -50,7 +37,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, setUserFromKakao, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

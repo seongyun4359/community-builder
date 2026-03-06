@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { UserModel } from "@/models";
+import { createSessionToken, getSessionCookieName, getSessionCookieOptions } from "@/lib/session";
 
 interface KakaoTokenResponse {
   access_token: string;
@@ -99,11 +100,13 @@ export async function GET(request: NextRequest) {
       provider: "kakao",
     };
 
-    const userParam = encodeURIComponent(JSON.stringify(userData));
-    const params = new URLSearchParams({ user: userParam });
+    const token = await createSessionToken(userData.id);
+    const params = new URLSearchParams();
     if (state === "signup") params.set("signup", "true");
 
-    return NextResponse.redirect(`${baseUrl}/auth/callback?${params.toString()}`);
+    const res = NextResponse.redirect(`${baseUrl}/auth/callback?${params.toString()}`);
+    res.cookies.set(getSessionCookieName(), token, getSessionCookieOptions());
+    return res;
   } catch (e) {
     console.error("[Kakao Callback Error]", e);
     return NextResponse.redirect(`${baseUrl}/login?error=server_error`);
