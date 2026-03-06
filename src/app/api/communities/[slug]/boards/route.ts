@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { CommunityModel, BoardModel } from "@/models";
+import { CommunityModel, BoardModel, PostModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
 
 export async function GET(
@@ -18,7 +18,19 @@ export async function GET(
       .select("-__v")
       .lean();
 
-    return successResponse(boards);
+    const boardIds = boards.map((b) => b._id);
+    const counts = await PostModel.aggregate([
+      { $match: { boardId: { $in: boardIds } } },
+      { $group: { _id: "$boardId", count: { $sum: 1 } } },
+    ]);
+    const countMap = new Map(counts.map((c) => [c._id.toString(), c.count]));
+
+    const boardsWithCount = boards.map((b) => ({
+      ...b,
+      postCount: countMap.get(b._id.toString()) || 0,
+    }));
+
+    return successResponse(boardsWithCount);
   } catch {
     return errorResponse("서버 오류가 발생했습니다.", 500);
   }
