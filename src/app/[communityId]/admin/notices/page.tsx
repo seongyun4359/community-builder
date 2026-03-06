@@ -49,7 +49,7 @@ export default function AdminNoticesPage() {
 
     setIsSubmitting(true);
     try {
-      await createPost(community.slug, { boardId: noticeBoard.id, title, content }, user.id);
+      await createPost(community.slug, { boardId: noticeBoard.id, title, content });
       toast.success("공지가 등록되었습니다.");
       setShowForm(false);
       setTitle("");

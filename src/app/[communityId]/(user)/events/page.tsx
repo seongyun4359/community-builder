@@ -41,7 +41,7 @@ export default function EventsPage() {
         location: form.location || undefined,
         startDate: form.startDate,
         maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
-      }, user.id);
+      });
       setEvents((prev) => [newEvent, ...prev]);
       setShowForm(false);
       setForm({ title: "", description: "", location: "", startDate: "", maxParticipants: "" });

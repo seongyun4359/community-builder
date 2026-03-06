@@ -1,10 +1,8 @@
 import type { Notification } from "@/types";
 import { apiFetch, normalizeId } from "./api";
 
-export async function fetchNotifications(slug: string, userId: string): Promise<Notification[]> {
-  const list = await apiFetch<(Notification & { _id: string })[]>(
-    `/api/communities/${slug}/notifications?userId=${userId}`
-  );
+export async function fetchNotifications(slug: string): Promise<Notification[]> {
+  const list = await apiFetch<(Notification & { _id: string })[]>(`/api/communities/${slug}/notifications`);
   return list.map(normalizeId);
 }
 
@@ -15,9 +13,9 @@ export async function markAsRead(slug: string, notificationId: string): Promise<
   });
 }
 
-export async function markAllAsRead(slug: string, userId: string): Promise<void> {
+export async function markAllAsRead(slug: string): Promise<void> {
   await apiFetch(`/api/communities/${slug}/notifications`, {
     method: "PUT",
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({}),
   });
 }

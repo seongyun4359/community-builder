@@ -22,7 +22,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (!user) { setIsLoading(false); return; }
-    fetchNotifications(community.slug, user.id)
+    fetchNotifications(community.slug)
       .then(setNotifications)
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -32,7 +32,7 @@ export default function NotificationsPage() {
 
   const handleMarkAll = async () => {
     if (!user) return;
-    await markAllAsRead(community.slug, user.id);
+    await markAllAsRead(community.slug);
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 

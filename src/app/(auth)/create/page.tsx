@@ -107,7 +107,7 @@ export default function CreateCommunityPage() {
 
     setIsSubmitting(true);
     try {
-      const community = await createCommunityAPI(form, user.id);
+      const community = await createCommunityAPI(form);
       toast.success(`"${community.name}" 커뮤니티가 생성되었습니다!`);
       router.push(`/${community.slug}/admin`);
     } catch (err) {

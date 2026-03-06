@@ -6,10 +6,10 @@ export async function fetchEvents(slug: string): Promise<CommunityEvent[]> {
   return list.map(normalizeId);
 }
 
-export async function createEvent(slug: string, form: CreateEventForm, authorId: string): Promise<CommunityEvent> {
+export async function createEvent(slug: string, form: CreateEventForm): Promise<CommunityEvent> {
   const data = await apiFetch<CommunityEvent & { _id: string }>(`/api/communities/${slug}/events`, {
     method: "POST",
-    body: JSON.stringify({ ...form, authorId }),
+    body: JSON.stringify(form),
   });
   return normalizeId(data);
 }
