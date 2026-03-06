@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Bell, Users, CalendarDays } from "lucide-react";
+import { FileText, Bell, Users, CalendarDays, Eye, MessageSquare, ArrowRight } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { fetchBoardsBySlug } from "@/services/community";
-import type { Board } from "@/types";
+import { fetchPosts } from "@/services/post";
+import type { Board, Post } from "@/types";
 
 export default function CommunityHomePage() {
   const community = useCommunity();
   const [boards, setBoards] = useState<Board[]>([]);
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     fetchBoardsBySlug(community.slug).then(setBoards).catch(() => {});
+    fetchPosts(community.slug, { limit: 5 })
+      .then((r) => setRecentPosts(r.posts))
+      .catch(() => {});
   }, [community.slug]);
 
   return (
@@ -38,6 +43,41 @@ export default function CommunityHomePage() {
           <QuickMenu icon={<CalendarDays className="h-5 w-5" />} label="모임" href={`/${community.slug}/events`} />
           <QuickMenu icon={<Users className="h-5 w-5" />} label="멤버" href={`/${community.slug}/members`} />
         </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-muted-foreground">최근 게시글</h2>
+          {recentPosts.length > 0 && (
+            <Link href={`/${community.slug}/boards`} className="flex items-center gap-0.5 text-xs font-medium text-primary">
+              전체보기 <ArrowRight className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+        {recentPosts.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-card py-10">
+            <FileText className="h-8 w-8 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground">아직 게시글이 없습니다</p>
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-card">
+            {recentPosts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/${community.slug}/posts/${post.id}`}
+                className="flex flex-col gap-1 px-4 py-3 transition-colors hover:bg-muted/50"
+              >
+                <span className="text-sm font-medium leading-snug">{post.title}</span>
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span>{post.author?.nickname || "알 수 없음"}</span>
+                  <span>{new Date(post.createdAt).toLocaleDateString("ko-KR")}</span>
+                  <span className="flex items-center gap-0.5"><Eye className="h-3 w-3" />{post.viewCount}</span>
+                  <span className="flex items-center gap-0.5"><MessageSquare className="h-3 w-3" />{post.commentCount}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="flex flex-col gap-3">
