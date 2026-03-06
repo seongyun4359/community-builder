@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ArrowLeft, LayoutDashboard, FileText, Bell, Shield, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowLeft, LayoutDashboard, FileText, Bell, Shield, Settings, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/hooks/useCommunity";
+import { useAuth } from "@/hooks/useAuth";
 
 const ADMIN_NAV = [
   { path: "", label: "대시보드", icon: LayoutDashboard },
@@ -20,8 +21,35 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const community = useCommunity();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const basePath = `/${community.slug}/admin`;
+
+  const isOwner = user?.id === community.ownerId;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-20">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isOwner) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
+        <Lock className="h-10 w-10 text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground">관리자 권한이 필요합니다</p>
+        <button
+          onClick={() => router.push(`/${community.slug}`)}
+          className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          커뮤니티로 돌아가기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
