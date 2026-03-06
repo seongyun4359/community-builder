@@ -2,39 +2,37 @@
 
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
+import { fetchMe } from "@/services/auth";
 import CircularProgress from "@mui/material/CircularProgress";
 
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUserFromKakao } = useAuth();
   const toast = useToast();
 
   useEffect(() => {
-    const userParam = searchParams.get("user");
     const isSignup = searchParams.get("signup") === "true";
 
-    if (!userParam) {
-      router.replace("/login?error=no_user_data");
-      return;
-    }
+    fetchMe()
+      .then((me) => {
+        if (!me) {
+          router.replace("/login?error=no_session");
+          return;
+        }
 
-    try {
-      const kakaoData = JSON.parse(decodeURIComponent(userParam));
-      setUserFromKakao(kakaoData);
+        if (isSignup || !me.nickname) {
+          router.replace("/signup/profile");
+          return;
+        }
 
-      if (isSignup || !kakaoData.nickname) {
-        router.replace("/signup/profile");
-      } else {
         toast.success("로그인되었습니다.");
         router.replace("/");
-      }
-    } catch {
-      router.replace("/login?error=invalid_data");
-    }
-  }, [searchParams, router, setUserFromKakao, toast]);
+      })
+      .catch(() => {
+        router.replace("/login?error=server_error");
+      });
+  }, [searchParams, router, toast]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center">
