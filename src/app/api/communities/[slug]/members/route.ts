@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel, MemberModel, UserModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireCommunityOwner } from "@/lib/api-auth";
 
 export async function GET(
   _request: NextRequest,
@@ -44,6 +45,9 @@ export async function PUT(
     const { slug } = await params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
+
+    const owner = await requireCommunityOwner(request, slug);
+    if (owner instanceof Response) return owner;
 
     const { userId, role } = await request.json();
     if (!userId || !role) return errorResponse("필수 항목을 입력해주세요.");

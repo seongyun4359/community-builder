@@ -2,19 +2,22 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel, NotificationModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof Response) return auth;
+
     await connectDB();
     const { slug } = await params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
 
-    const userId = request.nextUrl.searchParams.get("userId");
-    if (!userId) return errorResponse("userId가 필요합니다.");
+    const userId = auth.userId;
 
     const notifications = await NotificationModel.find({
       userId,
@@ -36,16 +39,20 @@ export async function PUT(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof Response) return auth;
+
     await connectDB();
     const { slug } = await params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
 
-    const { userId, notificationId } = await request.json();
+    const { notificationId } = await request.json();
+    const userId = auth.userId;
 
     if (notificationId) {
-      await NotificationModel.updateOne({ _id: notificationId }, { isRead: true });
-    } else if (userId) {
+      await NotificationModel.updateOne({ _id: notificationId, userId }, { isRead: true });
+    } else {
       await NotificationModel.updateMany(
         { userId, communityId: community._id.toString(), isRead: false },
         { isRead: true }

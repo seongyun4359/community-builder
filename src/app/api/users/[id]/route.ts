@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { UserModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(
   _request: NextRequest,
@@ -23,8 +24,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof Response) return auth;
+
     await connectDB();
     const { id } = await params;
+    if (auth.userId !== id) return errorResponse("권한이 없습니다.", 403);
     const body = await request.json();
     const { nickname, profileImage } = body;
 

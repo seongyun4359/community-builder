@@ -2,12 +2,19 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel, BoardModel, MemberModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
     const { searchParams } = request.nextUrl;
     const ownerId = searchParams.get("ownerId");
+
+    if (ownerId) {
+      const auth = await requireAuth(request);
+      if (auth instanceof Response) return auth;
+      if (auth.userId !== ownerId) return errorResponse("권한이 없습니다.", 403);
+    }
 
     const filter = ownerId ? { ownerId } : {};
     const communities = await CommunityModel.find(filter)
@@ -24,9 +31,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof Response) return auth;
+
     await connectDB();
     const body = await request.json();
-    const { slug, name, description, theme, ownerId } = body;
+    const { slug, name, description, theme } = body;
+    const ownerId = auth.userId;
 
     if (!slug || !name || !ownerId) {
       return errorResponse("필수 항목을 입력해주세요.");
