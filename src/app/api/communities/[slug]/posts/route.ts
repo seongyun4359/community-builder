@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel, PostModel, UserModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
@@ -56,13 +57,17 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const auth = await requireAuth(request);
+    if (auth instanceof Response) return auth;
+
     await connectDB();
     const { slug } = await params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
 
     const body = await request.json();
-    const { boardId, title, content, images, authorId } = body;
+    const { boardId, title, content, images } = body;
+    const authorId = auth.userId;
 
     if (!boardId || !title || !content || !authorId) {
       return errorResponse("필수 항목을 입력해주세요.");

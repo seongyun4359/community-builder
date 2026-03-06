@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
+import { requireCommunityOwner } from "@/lib/api-auth";
 
 export async function GET(
   _request: NextRequest,
@@ -25,6 +26,8 @@ export async function PUT(
   try {
     await connectDB();
     const { slug } = await params;
+    const owner = await requireCommunityOwner(request, slug);
+    if (owner instanceof Response) return owner;
     const body = await request.json();
 
     const community = await CommunityModel.findOne({ slug });
