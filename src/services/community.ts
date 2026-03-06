@@ -16,12 +16,11 @@ export async function fetchCommunityBySlug(slug: string): Promise<Community | nu
 }
 
 export async function createCommunityAPI(
-  form: CreateCommunityForm,
-  ownerId: string
+  form: CreateCommunityForm
 ): Promise<Community> {
   const c = await apiFetch<Community & { _id: string }>("/api/communities", {
     method: "POST",
-    body: JSON.stringify({ ...form, ownerId }),
+    body: JSON.stringify(form),
   });
   return normalizeId(c);
 }

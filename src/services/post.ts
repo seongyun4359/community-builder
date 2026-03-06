@@ -38,10 +38,10 @@ export async function fetchPost(slug: string, postId: string): Promise<Post> {
   return normalizeId(data);
 }
 
-export async function createPost(slug: string, form: CreatePostForm, authorId: string): Promise<Post> {
+export async function createPost(slug: string, form: CreatePostForm): Promise<Post> {
   const data = await apiFetch<Post & { _id: string }>(`/api/communities/${slug}/posts`, {
     method: "POST",
-    body: JSON.stringify({ ...form, authorId }),
+    body: JSON.stringify(form),
   });
   return normalizeId(data);
 }

@@ -34,7 +34,7 @@ export default function WritePostPage() {
 
     setIsSubmitting(true);
     try {
-      const post = await createPost(community.slug, { boardId, title, content }, user.id);
+      const post = await createPost(community.slug, { boardId, title, content });
       toast.success("게시글이 등록되었습니다.");
       router.push(`/${community.slug}/posts/${post.id}`);
     } catch {
