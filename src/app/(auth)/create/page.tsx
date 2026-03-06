@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -48,8 +48,15 @@ const SLUG_REGEX = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
 export default function CreateCommunityPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const toast = useToast();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast.error("로그인이 필요합니다.");
+      router.replace("/login");
+    }
+  }, [isLoading, isAuthenticated, router, toast]);
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<CreateCommunityForm>({
