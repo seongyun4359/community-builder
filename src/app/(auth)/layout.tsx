@@ -1,4 +1,5 @@
 import AppShell from "@/components/layout/AppShell";
+import PageTransition from "@/components/layout/PageTransition";
 
 export default function AuthLayout({
   children,
@@ -8,7 +9,7 @@ export default function AuthLayout({
   return (
     <AppShell>
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </AppShell>
   );

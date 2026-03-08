@@ -1,6 +1,7 @@
 import AppShell from "@/components/layout/AppShell";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
+import PageTransition from "@/components/layout/PageTransition";
 
 export default function MainLayout({
   children,
@@ -11,7 +12,7 @@ export default function MainLayout({
     <AppShell>
       <Header />
       <main className="flex-1 pb-20">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav />
     </AppShell>

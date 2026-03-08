@@ -2,6 +2,7 @@
 
 import CommunityHeader from "@/components/layout/CommunityHeader";
 import BottomNav from "@/components/layout/BottomNav";
+import PageTransition from "@/components/layout/PageTransition";
 import { useCommunity } from "@/hooks/useCommunity";
 
 export default function CommunityUserLayout({
@@ -15,7 +16,7 @@ export default function CommunityUserLayout({
     <>
       <CommunityHeader />
       <main className="flex-1 pb-20">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav basePath={`/${community.slug}`} />
     </>

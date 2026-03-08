@@ -6,6 +6,7 @@ import { ArrowLeft, LayoutDashboard, FileText, Bell, Shield, Settings, Lock } fr
 import { cn } from "@/lib/utils";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
+import PageTransition from "@/components/layout/PageTransition";
 
 const ADMIN_NAV = [
   { path: "", label: "대시보드", icon: LayoutDashboard },
@@ -95,7 +96,7 @@ export default function AdminLayout({
       </div>
 
       <main className="flex-1 px-4 py-6">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </>
   );
