@@ -6,10 +6,14 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { createPost } from "@/services/post";
+
+const TITLE_MAX = 60;
+const CONTENT_MAX = 5000;
 
 export default function WritePostPage() {
   const community = useCommunity();
@@ -22,15 +26,24 @@ export default function WritePostPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [touched, setTouched] = useState({ title: false, content: false });
 
   if (!isAuthenticated || !user) {
     router.replace("/login");
     return null;
   }
 
+  const titleError =
+    !title.trim() ? "제목을 입력해주세요." : title.length > TITLE_MAX ? `제목은 최대 ${TITLE_MAX}자입니다.` : "";
+  const contentError =
+    !content.trim() ? "내용을 입력해주세요." : content.length > CONTENT_MAX ? `내용은 최대 ${CONTENT_MAX}자입니다.` : "";
+
   const handleSubmit = async () => {
-    if (!title.trim()) { toast.error("제목을 입력해주세요."); return; }
-    if (!content.trim()) { toast.error("내용을 입력해주세요."); return; }
+    setTouched({ title: true, content: true });
+    if (titleError || contentError) {
+      toast.error("입력값을 확인해주세요.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -59,24 +72,40 @@ export default function WritePostPage() {
           placeholder="제목을 입력하세요"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onBlur={() => setTouched((t) => ({ ...t, title: true }))}
           fullWidth
           size="small"
-          slotProps={{ input: { style: { fontFamily: "inherit" } } }}
+          error={touched.title && !!titleError}
+          helperText={`${title.length}/${TITLE_MAX}`}
+          inputProps={{ maxLength: TITLE_MAX }}
+          slotProps={{
+            input: { style: { fontFamily: "inherit" } },
+            formHelperText: { style: { fontFamily: "inherit" } },
+          }}
         />
+        <FormError message={touched.title ? titleError : ""} />
         <TextField
           label="내용"
           placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onBlur={() => setTouched((t) => ({ ...t, content: true }))}
           fullWidth
           multiline
           minRows={8}
-          slotProps={{ input: { style: { fontFamily: "inherit" } } }}
+          error={touched.content && !!contentError}
+          helperText={`${content.length}/${CONTENT_MAX}`}
+          inputProps={{ maxLength: CONTENT_MAX }}
+          slotProps={{
+            input: { style: { fontFamily: "inherit" } },
+            formHelperText: { style: { fontFamily: "inherit" } },
+          }}
         />
+        <FormError message={touched.content ? contentError : ""} />
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={isSubmitting || !title.trim() || !content.trim()}
+          disabled={isSubmitting || !!titleError || !!contentError}
           sx={{
             py: 1.5,
             borderRadius: "12px",

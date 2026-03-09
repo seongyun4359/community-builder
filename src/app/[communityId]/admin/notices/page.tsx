@@ -4,12 +4,16 @@ import { useEffect, useState, useCallback } from "react";
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { fetchBoardsBySlug } from "@/services/community";
 import { fetchPosts, createPost, deletePost } from "@/services/post";
 import type { Board, Post } from "@/types";
+
+const TITLE_MAX = 60;
+const CONTENT_MAX = 2000;
 
 export default function AdminNoticesPage() {
   const community = useCommunity();
@@ -22,6 +26,7 @@ export default function AdminNoticesPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [touched, setTouched] = useState({ title: false, content: false });
 
   const loadNotices = useCallback(async () => {
     if (!noticeBoard) return;
@@ -43,8 +48,11 @@ export default function AdminNoticesPage() {
   }, [loadNotices]);
 
   const handleSubmit = async () => {
-    if (!title.trim()) { toast.error("제목을 입력해주세요."); return; }
-    if (!content.trim()) { toast.error("내용을 입력해주세요."); return; }
+    setTouched({ title: true, content: true });
+    if (titleError || contentError) {
+      toast.error("입력값을 확인해주세요.");
+      return;
+    }
     if (!noticeBoard || !user) return;
 
     setIsSubmitting(true);
@@ -61,6 +69,11 @@ export default function AdminNoticesPage() {
       setIsSubmitting(false);
     }
   };
+
+  const titleError =
+    !title.trim() ? "제목을 입력해주세요." : title.length > TITLE_MAX ? `제목은 최대 ${TITLE_MAX}자입니다.` : "";
+  const contentError =
+    !content.trim() ? "내용을 입력해주세요." : content.length > CONTENT_MAX ? `내용은 최대 ${CONTENT_MAX}자입니다.` : "";
 
   const handleDelete = async (post: Post) => {
     if (!confirm(`"${post.title}" 공지를 삭제할까요?`)) return;
@@ -97,27 +110,37 @@ export default function AdminNoticesPage() {
             label="공지 제목"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, title: true }))}
             fullWidth
             size="small"
-            slotProps={{ input: { style: { fontFamily: "inherit" } } }}
+            error={touched.title && !!titleError}
+            helperText={`${title.length}/${TITLE_MAX}`}
+            inputProps={{ maxLength: TITLE_MAX }}
+            slotProps={{ input: { style: { fontFamily: "inherit" } }, formHelperText: { style: { fontFamily: "inherit" } } }}
           />
+          <FormError message={touched.title ? titleError : ""} />
           <TextField
             label="내용"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, content: true }))}
             fullWidth
             size="small"
             multiline
             minRows={3}
-            slotProps={{ input: { style: { fontFamily: "inherit" } } }}
+            error={touched.content && !!contentError}
+            helperText={`${content.length}/${CONTENT_MAX}`}
+            inputProps={{ maxLength: CONTENT_MAX }}
+            slotProps={{ input: { style: { fontFamily: "inherit" } }, formHelperText: { style: { fontFamily: "inherit" } } }}
           />
+          <FormError message={touched.content ? contentError : ""} />
           <div className="flex justify-end gap-2">
             <Button variant="outlined" size="small" onClick={() => setShowForm(false)}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit" }}>
               취소
             </Button>
             <Button variant="contained" size="small" startIcon={<Send className="h-3.5 w-3.5" />}
-              onClick={handleSubmit} disabled={isSubmitting}
+              onClick={handleSubmit} disabled={isSubmitting || !!titleError || !!contentError}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit", fontWeight: 600 }}>
               {isSubmitting ? "등록 중..." : "공지 등록"}
             </Button>

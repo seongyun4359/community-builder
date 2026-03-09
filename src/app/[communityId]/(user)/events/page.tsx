@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import { CalendarDays, MapPin, Plus, Users } from "lucide-react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { fetchEvents, createEvent } from "@/services/event";
 import type { CommunityEvent } from "@/types";
 import { Skeleton } from "@/components/ui/Loading";
+
+const TITLE_MAX = 40;
+const DESCRIPTION_MAX = 300;
+const LOCATION_MAX = 60;
 
 export default function EventsPage() {
   const community = useCommunity();
@@ -21,6 +26,15 @@ export default function EventsPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", location: "", startDate: "", maxParticipants: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [touched, setTouched] = useState({ title: false, startDate: false });
+
+  const titleError = !form.title.trim()
+    ? "모임 이름을 입력해주세요."
+    : form.title.length > TITLE_MAX
+      ? `모임 이름은 최대 ${TITLE_MAX}자입니다.`
+      : "";
+
+  const startDateError = !form.startDate ? "날짜를 선택해주세요." : "";
 
   useEffect(() => {
     fetchEvents(community.slug)
@@ -30,15 +44,18 @@ export default function EventsPage() {
   }, [community.slug]);
 
   const handleCreate = async () => {
-    if (!form.title.trim()) { toast.error("모임 이름을 입력해주세요."); return; }
-    if (!form.startDate) { toast.error("날짜를 선택해주세요."); return; }
+    setTouched({ title: true, startDate: true });
+    if (titleError || startDateError) {
+      toast.error("입력값을 확인해주세요.");
+      return;
+    }
     if (!user) { toast.error("로그인이 필요합니다."); return; }
 
     setIsSubmitting(true);
     try {
       const newEvent = await createEvent(community.slug, {
-        title: form.title,
-        description: form.description,
+        title: form.title.trim(),
+        description: form.description.trim(),
         location: form.location || undefined,
         startDate: form.startDate,
         maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
@@ -67,21 +84,64 @@ export default function EventsPage() {
 
       {showForm && (
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
-          <TextField label="모임 이름" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            fullWidth size="small" slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
-          <TextField label="설명" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            fullWidth size="small" multiline minRows={2} slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
+          <TextField
+            label="모임 이름"
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            onBlur={() => setTouched((t) => ({ ...t, title: true }))}
+            fullWidth
+            size="small"
+            error={touched.title && !!titleError}
+            helperText={`${form.title.length}/${TITLE_MAX}`}
+            inputProps={{ maxLength: TITLE_MAX }}
+            slotProps={{ input: { style: { fontFamily: "inherit" } }, formHelperText: { style: { fontFamily: "inherit" } } }}
+          />
+          <FormError message={touched.title ? titleError : ""} />
+          <TextField
+            label="설명"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            fullWidth
+            size="small"
+            multiline
+            minRows={2}
+            helperText={`${form.description.length}/${DESCRIPTION_MAX}`}
+            inputProps={{ maxLength: DESCRIPTION_MAX }}
+            slotProps={{ input: { style: { fontFamily: "inherit" } }, formHelperText: { style: { fontFamily: "inherit" } } }}
+          />
           <div className="grid grid-cols-2 gap-3">
-            <TextField label="날짜" type="datetime-local" value={form.startDate}
+            <TextField
+              label="날짜"
+              type="datetime-local"
+              value={form.startDate}
               onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-              fullWidth size="small" slotProps={{ inputLabel: { shrink: true }, input: { style: { fontFamily: "inherit" } } }} />
-            <TextField label="장소 (선택)" value={form.location}
+              onBlur={() => setTouched((t) => ({ ...t, startDate: true }))}
+              fullWidth
+              size="small"
+              error={touched.startDate && !!startDateError}
+              helperText={touched.startDate ? startDateError : " "}
+              slotProps={{
+                inputLabel: { shrink: true },
+                input: { style: { fontFamily: "inherit" } },
+                formHelperText: { style: { fontFamily: "inherit" } },
+              }}
+            />
+            <TextField
+              label="장소 (선택)"
+              value={form.location}
               onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-              fullWidth size="small" slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
+              fullWidth
+              size="small"
+              helperText={`${form.location.length}/${LOCATION_MAX}`}
+              inputProps={{ maxLength: LOCATION_MAX }}
+              slotProps={{ input: { style: { fontFamily: "inherit" } }, formHelperText: { style: { fontFamily: "inherit" } } }}
+            />
           </div>
           <TextField label="최대 인원 (선택)" type="number" value={form.maxParticipants}
             onChange={(e) => setForm((f) => ({ ...f, maxParticipants: e.target.value }))}
-            fullWidth size="small" slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
+            fullWidth size="small"
+            inputProps={{ min: 1, max: 9999 }}
+            slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
           <div className="flex justify-end gap-2">
             <Button variant="outlined" size="small" onClick={() => setShowForm(false)}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit" }}>취소</Button>
