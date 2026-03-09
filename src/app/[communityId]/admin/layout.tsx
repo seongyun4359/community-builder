@@ -8,6 +8,7 @@ import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import PageTransition from "@/components/layout/PageTransition";
 import { PageLoading } from "@/components/ui/Loading";
+import { motion } from "framer-motion";
 
 const ADMIN_NAV = [
   { path: "", label: "대시보드", icon: LayoutDashboard },
@@ -87,8 +88,14 @@ export default function AdminLayout({
                   : "border-transparent text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon className="h-4 w-4" />
-              {item.label}
+              <motion.span
+                animate={{ scale: isActive ? 1.03 : 1, opacity: isActive ? 1 : 0.9 }}
+                transition={{ duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
+                className="flex items-center gap-1.5"
+              >
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </motion.span>
             </Link>
           );
         })}

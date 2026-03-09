@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface NavItem {
   path: string;
@@ -63,7 +64,7 @@ export default function BottomNav({ basePath = "" }: BottomNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[var(--width-app)] -translate-x-1/2 border-t border-border bg-background/95 backdrop-blur-sm">
+    <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-(--width-app) -translate-x-1/2 border-t border-border bg-background/95 backdrop-blur-sm">
       <div className="flex h-16 items-center justify-around">
         {NAV_ITEMS.map((item) => {
           const href = basePath + item.path || "/";
@@ -82,8 +83,21 @@ export default function BottomNav({ basePath = "" }: BottomNavProps) {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {item.icon}
-              <span>{item.label}</span>
+              <motion.div
+                whileTap={{ scale: 0.92 }}
+                animate={{
+                  scale: isActive ? 1.06 : 1,
+                  opacity: isActive ? 1 : 0.85,
+                  y: isActive ? -1 : 0,
+                }}
+                transition={{ duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
+                className="flex flex-col items-center gap-0.5"
+              >
+                {item.icon}
+                <span className={cn("transition-opacity", isActive ? "opacity-100" : "opacity-90")}>
+                  {item.label}
+                </span>
+              </motion.div>
             </Link>
           );
         })}
