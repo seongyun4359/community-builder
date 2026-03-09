@@ -6,6 +6,7 @@ import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchNotifications, markAllAsRead, markAsRead } from "@/services/notification";
 import type { Notification } from "@/types";
+import { Skeleton } from "@/components/ui/Loading";
 
 const TYPE_LABELS: Record<string, string> = {
   notice: "공지",
@@ -45,7 +46,7 @@ export default function NotificationsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3 px-4 py-6">
-        {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-muted" />)}
+        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
       </div>
     );
   }

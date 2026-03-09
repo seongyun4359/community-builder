@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import PageTransition from "@/components/layout/PageTransition";
+import { PageLoading } from "@/components/ui/Loading";
 
 const ADMIN_NAV = [
   { path: "", label: "대시보드", icon: LayoutDashboard },
@@ -31,9 +32,7 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
+      <PageLoading />
     );
   }
 

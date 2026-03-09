@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { fetchEvents, createEvent } from "@/services/event";
 import type { CommunityEvent } from "@/types";
+import { Skeleton } from "@/components/ui/Loading";
 
 export default function EventsPage() {
   const community = useCommunity();
@@ -94,7 +95,7 @@ export default function EventsPage() {
 
       {isLoading ? (
         <div className="flex flex-col gap-2">
-          {[1, 2].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />)}
+          {[1, 2].map((i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
         </div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16">

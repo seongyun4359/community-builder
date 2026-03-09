@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppShell from "@/components/layout/AppShell";
+import { PageLoading } from "@/components/ui/Loading";
 import { fetchCommunityBySlug } from "@/services/community";
 import type { Community } from "@/types";
 import { CommunityContext } from "@/hooks/useCommunity";
@@ -34,9 +35,7 @@ export default function CommunityLayout({
   if (isLoading || !community) {
     return (
       <AppShell>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
+        <PageLoading />
       </AppShell>
     );
   }

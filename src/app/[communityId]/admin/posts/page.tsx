@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { fetchBoardsBySlug } from "@/services/community";
 import { fetchPosts, deletePost, togglePin, type PostListResult } from "@/services/post";
 import type { Board, Post } from "@/types";
+import { Skeleton } from "@/components/ui/Loading";
 
 export default function AdminPostsPage() {
   const community = useCommunity();
@@ -76,7 +77,7 @@ export default function AdminPostsPage() {
 
       {isLoading ? (
         <div className="flex flex-col gap-2">
-          {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-muted" />)}
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
       ) : !result?.posts.length ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card py-16">

@@ -7,6 +7,7 @@ import { Crown, Shield, Users } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { fetchMembers } from "@/services/member";
 import type { Member } from "@/types";
+import { Skeleton } from "@/components/ui/Loading";
 
 const ROLE_LABELS: Record<string, string> = {
   super_admin: "최고 관리자",
@@ -31,7 +32,7 @@ export default function MembersPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 px-4 py-6">
-        {[1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />)}
+        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-2xl" />)}
       </div>
     );
   }
@@ -54,7 +55,6 @@ export default function MembersPage() {
       ) : (
         <div className="flex flex-col gap-2">
           {members.map((m) => {
-            const isAdmin = m.role === "super_admin" || m.role === "admin";
             return (
               <div key={m.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
                 {m.user?.profileImage ? (
