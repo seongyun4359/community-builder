@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
@@ -13,22 +13,17 @@ export default function ProfileSetupPage() {
   const router = useRouter();
   const { user, updateProfile, isLoading } = useAuth();
   const toast = useToast();
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (user) {
-      if (user.nickname) setNickname(user.nickname);
-    }
-  }, [user]);
-
   const profileImage = user?.profileImage;
+  const displayedNickname = nickname ?? user?.nickname ?? "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    const trimmed = nickname.trim();
+    const trimmed = displayedNickname.trim();
     if (!trimmed) {
       setError("닉네임을 입력해주세요.");
       return;
@@ -74,7 +69,7 @@ export default function ProfileSetupPage() {
               bgcolor: "var(--primary)",
             }}
           >
-            {nickname?.[0]?.toUpperCase() ??
+            {displayedNickname?.[0]?.toUpperCase() ??
               user?.email?.[0]?.toUpperCase() ??
               "?"}
           </Avatar>
@@ -84,10 +79,10 @@ export default function ProfileSetupPage() {
           <Input
             label="닉네임"
             placeholder="2~12자 닉네임을 입력하세요"
-            value={nickname}
+            value={displayedNickname}
             onChange={(e) => setNickname(e.target.value)}
             error={!!error}
-            helperText={error || `${nickname.length}/12`}
+            helperText={error || `${displayedNickname.length}/12`}
             slotProps={{ htmlInput: { maxLength: 12 } }}
           />
         </div>
@@ -95,7 +90,7 @@ export default function ProfileSetupPage() {
         <Button
           type="submit"
           fullWidth
-          disabled={isLoading || !nickname.trim()}
+          disabled={isLoading || !displayedNickname.trim()}
         >
           {isLoading ? "저장 중..." : "시작하기"}
         </Button>
