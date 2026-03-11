@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Shield, ChevronRight } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
-import { fetchMembers } from "@/services/member";
-import type { Member } from "@/types";
+import { useMembersQuery } from "@/queries/hooks";
 
 const ROLE_CONFIG = [
   { id: "super_admin", label: "최고 관리자", description: "모든 권한 보유, 커뮤니티 삭제 가능", color: "bg-destructive/10 text-destructive" },
@@ -16,16 +15,16 @@ const ROLE_CONFIG = [
 
 export default function AdminRolesPage() {
   const community = useCommunity();
-  const [members, setMembers] = useState<Member[]>([]);
+  const { data: members = [] } = useMembersQuery(community.slug);
 
-  useEffect(() => {
-    fetchMembers(community.slug).then(setMembers).catch(() => {});
-  }, [community.slug]);
-
-  const roleCounts = ROLE_CONFIG.map((role) => ({
-    ...role,
-    count: members.filter((m) => m.role === role.id).length,
-  }));
+  const roleCounts = useMemo(
+    () =>
+      ROLE_CONFIG.map((role) => ({
+        ...role,
+        count: members.filter((m) => m.role === role.id).length,
+      })),
+    [members]
+  );
 
   return (
     <div className="flex flex-col gap-6">

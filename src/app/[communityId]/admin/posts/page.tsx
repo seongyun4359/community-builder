@@ -1,48 +1,29 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { FileText, Trash2, Pin, PinOff, Eye } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useToast } from "@/hooks/useToast";
-import { fetchBoardsBySlug } from "@/services/community";
-import { fetchPosts, deletePost, togglePin, type PostListResult } from "@/services/post";
-import type { Board, Post } from "@/types";
+import type { Post } from "@/types";
 import { Skeleton } from "@/components/ui/Loading";
+import { useBoardsQuery, useDeletePostMutation, usePostListQuery, useTogglePinMutation } from "@/queries/hooks";
 
 export default function AdminPostsPage() {
   const community = useCommunity();
   const toast = useToast();
-  const [boards, setBoards] = useState<Board[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string>("all");
-  const [result, setResult] = useState<PostListResult | null>(null);
-
-  const loadPosts = useCallback(async () => {
-    setResult(null);
-    try {
-      const data = await fetchPosts(community.slug, {
-        boardId: selectedBoard === "all" ? undefined : selectedBoard,
-      });
-      setResult(data);
-    } catch { /* empty */ }
-  }, [community.slug, selectedBoard]);
-
-  useEffect(() => {
-    fetchBoardsBySlug(community.slug).then(setBoards).catch(() => {});
-  }, [community.slug]);
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      loadPosts();
-    }, 0);
-    return () => clearTimeout(id);
-  }, [loadPosts]);
+  const { data: boards = [] } = useBoardsQuery(community.slug);
+  const { data: result, isLoading } = usePostListQuery(community.slug, {
+    boardId: selectedBoard === "all" ? undefined : selectedBoard,
+  });
+  const deleteMutation = useDeletePostMutation(community.slug);
+  const togglePinMutation = useTogglePinMutation(community.slug);
 
   const handleDelete = async (post: Post) => {
     if (!confirm(`"${post.title}" 게시글을 삭제할까요?`)) return;
     try {
-      await deletePost(community.slug, post.id);
+      await deleteMutation.mutateAsync(post.id);
       toast.success("게시글이 삭제되었습니다.");
-      loadPosts();
     } catch {
       toast.error("삭제에 실패했습니다.");
     }
@@ -50,15 +31,14 @@ export default function AdminPostsPage() {
 
   const handleTogglePin = async (post: Post) => {
     try {
-      await togglePin(community.slug, post.id, !post.isPinned);
+      await togglePinMutation.mutateAsync({ postId: post.id, isPinned: !post.isPinned });
       toast.success(post.isPinned ? "고정 해제되었습니다." : "게시글이 고정되었습니다.");
-      loadPosts();
     } catch {
       toast.error("처리에 실패했습니다.");
     }
   };
 
-  const boardMap = new Map(boards.map((b) => [b.id, b.name]));
+  const boardMap = useMemo(() => new Map(boards.map((b) => [b.id, b.name])), [boards]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,7 +56,7 @@ export default function AdminPostsPage() {
         ))}
       </div>
 
-      {!result ? (
+      {isLoading || !result ? (
         <div className="flex flex-col gap-2">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>

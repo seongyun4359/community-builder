@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -8,9 +8,8 @@ import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
-import { fetchBoardsBySlug } from "@/services/community";
-import { fetchPosts, createPost, deletePost } from "@/services/post";
 import type { Board, Post } from "@/types";
+import { useBoardsQuery, useCreatePostMutation, useDeletePostMutation, usePostListQuery } from "@/queries/hooks";
 
 const TITLE_MAX = 60;
 const CONTENT_MAX = 2000;
@@ -20,32 +19,21 @@ export default function AdminNoticesPage() {
   const { user } = useAuth();
   const toast = useToast();
 
-  const [noticeBoard, setNoticeBoard] = useState<Board | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { data: boards = [] } = useBoardsQuery(community.slug);
+  const noticeBoard: Board | null = useMemo(() => boards.find((b) => b.type === "notice") ?? null, [boards]);
+  const { data: notices } = usePostListQuery(
+    community.slug,
+    { boardId: noticeBoard?.id, limit: 50 },
+    { enabled: !!noticeBoard?.id }
+  );
+  const posts: Post[] = notices?.posts ?? [];
+  const createMutation = useCreatePostMutation(community.slug);
+  const deleteMutation = useDeletePostMutation(community.slug);
+
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({ title: false, content: false });
-
-  const loadNotices = useCallback(async () => {
-    if (!noticeBoard) return;
-    try {
-      const data = await fetchPosts(community.slug, { boardId: noticeBoard.id });
-      setPosts(data.posts);
-    } catch { /* empty */ }
-  }, [community.slug, noticeBoard]);
-
-  useEffect(() => {
-    fetchBoardsBySlug(community.slug).then((boards) => {
-      const nb = boards.find((b) => b.type === "notice");
-      setNoticeBoard(nb || null);
-    }).catch(() => {});
-  }, [community.slug]);
-
-  useEffect(() => {
-    loadNotices();
-  }, [loadNotices]);
 
   const handleSubmit = async () => {
     setTouched({ title: true, content: true });
@@ -54,19 +42,14 @@ export default function AdminNoticesPage() {
       return;
     }
     if (!noticeBoard || !user) return;
-
-    setIsSubmitting(true);
     try {
-      await createPost(community.slug, { boardId: noticeBoard.id, title, content });
+      await createMutation.mutateAsync({ boardId: noticeBoard.id, title, content });
       toast.success("공지가 등록되었습니다.");
       setShowForm(false);
       setTitle("");
       setContent("");
-      loadNotices();
     } catch {
       toast.error("등록에 실패했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -78,9 +61,8 @@ export default function AdminNoticesPage() {
   const handleDelete = async (post: Post) => {
     if (!confirm(`"${post.title}" 공지를 삭제할까요?`)) return;
     try {
-      await deletePost(community.slug, post.id);
+      await deleteMutation.mutateAsync(post.id);
       toast.success("공지가 삭제되었습니다.");
-      loadNotices();
     } catch {
       toast.error("삭제에 실패했습니다.");
     }
@@ -140,9 +122,9 @@ export default function AdminNoticesPage() {
               취소
             </Button>
             <Button variant="contained" size="small" startIcon={<Send className="h-3.5 w-3.5" />}
-              onClick={handleSubmit} disabled={isSubmitting || !!titleError || !!contentError}
+              onClick={handleSubmit} disabled={createMutation.isPending || !!titleError || !!contentError}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit", fontWeight: 600 }}>
-              {isSubmitting ? "등록 중..." : "공지 등록"}
+              {createMutation.isPending ? "등록 중..." : "공지 등록"}
             </Button>
           </div>
         </div>
