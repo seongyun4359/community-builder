@@ -15,17 +15,15 @@ export default function AdminPostsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string>("all");
   const [result, setResult] = useState<PostListResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const loadPosts = useCallback(async () => {
-    setIsLoading(true);
+    setResult(null);
     try {
       const data = await fetchPosts(community.slug, {
         boardId: selectedBoard === "all" ? undefined : selectedBoard,
       });
       setResult(data);
     } catch { /* empty */ }
-    setIsLoading(false);
   }, [community.slug, selectedBoard]);
 
   useEffect(() => {
@@ -33,7 +31,10 @@ export default function AdminPostsPage() {
   }, [community.slug]);
 
   useEffect(() => {
-    loadPosts();
+    const id = setTimeout(() => {
+      loadPosts();
+    }, 0);
+    return () => clearTimeout(id);
   }, [loadPosts]);
 
   const handleDelete = async (post: Post) => {
@@ -75,11 +76,11 @@ export default function AdminPostsPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {!result ? (
         <div className="flex flex-col gap-2">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
-      ) : !result?.posts.length ? (
+      ) : !result.posts.length ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-card py-16">
           <FileText className="h-10 w-10 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">아직 게시글이 없습니다</p>
