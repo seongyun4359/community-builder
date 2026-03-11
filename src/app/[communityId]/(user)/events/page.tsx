@@ -64,9 +64,23 @@ export default function EventsPage() {
     <div className="flex flex-col gap-4 px-4 py-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold">모임</h1>
-        <Button variant="contained" size="small" startIcon={<Plus className="h-4 w-4" />}
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<Plus className="h-4 w-4" />}
           onClick={() => setShowForm(!showForm)}
-          sx={{ borderRadius: "12px", textTransform: "none", fontFamily: "inherit", fontWeight: 600 }}>
+          sx={{
+            borderRadius: "12px",
+            textTransform: "none",
+            fontFamily: "inherit",
+            fontWeight: 600,
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
+            "&:hover": {
+              backgroundColor: "color-mix(in srgb, var(--primary) 90%, #000 10%)",
+            },
+          }}
+        >
           모임 만들기
         </Button>
       </div>
@@ -132,10 +146,41 @@ export default function EventsPage() {
             inputProps={{ min: 1, max: 9999 }}
             slotProps={{ input: { style: { fontFamily: "inherit" } } }} />
           <div className="flex justify-end gap-2">
-            <Button variant="outlined" size="small" onClick={() => setShowForm(false)}
-              sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit" }}>취소</Button>
-            <Button variant="contained" size="small" onClick={handleCreate} disabled={!canSubmit}
-              sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit", fontWeight: 600 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setShowForm(false)}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontFamily: "inherit",
+                borderColor: "var(--border)",
+                color: "var(--muted-foreground)",
+                "&:hover": {
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--muted)",
+                },
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleCreate}
+              disabled={!canSubmit}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontFamily: "inherit",
+                fontWeight: 600,
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                "&:hover": {
+                  backgroundColor: "color-mix(in srgb, var(--primary) 90%, #000 10%)",
+                },
+              }}
+            >
               {createMutation.isPending ? "생성 중..." : "만들기"}
             </Button>
           </div>

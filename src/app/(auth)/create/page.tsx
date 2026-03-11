@@ -179,6 +179,11 @@ export default function CreateCommunityPage() {
               fontWeight: 600,
               textTransform: "none",
               fontSize: "0.9rem",
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
+              "&:hover": {
+                backgroundColor: "color-mix(in srgb, var(--primary) 90%, #000 10%)",
+              },
             }}
           >
             다음
@@ -232,6 +237,12 @@ export default function CreateCommunityPage() {
                 fontWeight: 600,
                 textTransform: "none",
                 fontSize: "0.9rem",
+                borderColor: "var(--border)",
+                color: "var(--muted-foreground)",
+                "&:hover": {
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--muted)",
+                },
               }}
             >
               이전
@@ -248,6 +259,11 @@ export default function CreateCommunityPage() {
                 fontWeight: 600,
                 textTransform: "none",
                 fontSize: "0.9rem",
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                "&:hover": {
+                  backgroundColor: "color-mix(in srgb, var(--primary) 90%, #000 10%)",
+                },
               }}
             >
               {createCommunity.isPending ? "생성 중..." : "커뮤니티 생성"}
