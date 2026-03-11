@@ -1,14 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback } from "react";
 import Toast, { type ToastType } from "@/components/ui/Toast";
-
-interface ToastItem {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration?: number;
-}
+import { useToastStore } from "@/stores/toastStore";
 
 export interface ToastContextValue {
   toast: (message: string, type?: ToastType, duration?: number) => void;
@@ -21,24 +15,18 @@ export interface ToastContextValue {
 export const ToastContext = createContext<ToastContextValue | null>(null);
 
 export default function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toasts = useToastStore((s) => s.toasts);
+  const remove = useToastStore((s) => s.remove);
+  const toast = useToastStore((s) => s.toast);
+  const success = useToastStore((s) => s.success);
+  const error = useToastStore((s) => s.error);
+  const info = useToastStore((s) => s.info);
+  const warning = useToastStore((s) => s.warning);
 
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const addToast = useCallback((message: string, type: ToastType = "info", duration?: number) => {
-    const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
-  }, []);
-
-  const success = useCallback((message: string, duration?: number) => addToast(message, "success", duration), [addToast]);
-  const error = useCallback((message: string, duration?: number) => addToast(message, "error", duration), [addToast]);
-  const info = useCallback((message: string, duration?: number) => addToast(message, "info", duration), [addToast]);
-  const warning = useCallback((message: string, duration?: number) => addToast(message, "warning", duration), [addToast]);
+  const removeToast = useCallback((id: string) => remove(id), [remove]);
 
   return (
-    <ToastContext.Provider value={{ toast: addToast, success, error, info, warning }}>
+    <ToastContext.Provider value={{ toast, success, error, info, warning }}>
       {children}
       <div className="pointer-events-none fixed bottom-6 left-1/2 z-[9999] flex -translate-x-1/2 flex-col-reverse items-center gap-2">
         {toasts.map((t) => (
