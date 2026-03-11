@@ -3,19 +3,21 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
-import { fetchMe } from "@/services/auth";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useMeQuery } from "@/queries/hooks";
 
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
+  const { refetch } = useMeQuery({ enabled: false });
 
   useEffect(() => {
     const isSignup = searchParams.get("signup") === "true";
 
-    fetchMe()
-      .then((me) => {
+    refetch()
+      .then((result) => {
+        const me = result.data;
         if (!me) {
           router.replace("/login?error=no_session");
           return;
@@ -32,7 +34,7 @@ function CallbackContent() {
       .catch(() => {
         router.replace("/login?error=server_error");
       });
-  }, [searchParams, router, toast]);
+  }, [refetch, searchParams, router, toast]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center">
