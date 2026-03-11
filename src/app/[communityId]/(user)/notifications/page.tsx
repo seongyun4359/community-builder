@@ -18,32 +18,42 @@ const TYPE_LABELS: Record<string, string> = {
 export default function NotificationsPage() {
   const community = useCommunity();
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[] | null>(null);
 
   useEffect(() => {
-    if (!user) { setIsLoading(false); return; }
+    if (!user) return;
     fetchNotifications(community.slug)
       .then(setNotifications)
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
+      .catch(() => setNotifications([]));
   }, [community.slug, user]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = (notifications ?? []).filter((n) => !n.isRead).length;
 
   const handleMarkAll = async () => {
     if (!user) return;
     await markAllAsRead(community.slug);
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications((prev) => (prev ?? []).map((n) => ({ ...n, isRead: true })));
   };
 
   const handleRead = async (n: Notification) => {
     if (n.isRead) return;
     await markAsRead(community.slug, n.id);
-    setNotifications((prev) => prev.map((item) => item.id === n.id ? { ...item, isRead: true } : item));
+    setNotifications((prev) => (prev ?? []).map((item) => item.id === n.id ? { ...item, isRead: true } : item));
   };
 
-  if (isLoading) {
+  if (!user) {
+    return (
+      <div className="flex flex-col gap-4 px-4 py-6">
+        <h1 className="text-lg font-bold">알림</h1>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <Bell className="h-10 w-10 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">로그인 후 알림을 확인할 수 있어요</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!notifications) {
     return (
       <div className="flex flex-col gap-3 px-4 py-6">
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
