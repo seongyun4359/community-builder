@@ -1,22 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchCommunitiesByOwner } from "@/services/community";
-import type { Community } from "@/types";
+import { useCommunitiesByOwnerQuery } from "@/queries/hooks";
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [myCommunities, setMyCommunities] = useState<Community[]>([]);
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      fetchCommunitiesByOwner(user.id).then(setMyCommunities).catch(() => {});
-    }
-  }, [isAuthenticated, user]);
+  const ownerId = user?.id ?? "";
+  const { data: myCommunities = [] } = useCommunitiesByOwnerQuery(ownerId, isAuthenticated && !!user);
 
   return (
     <div className="flex flex-col">

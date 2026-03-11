@@ -8,8 +8,8 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
-import { createCommunityAPI, checkSlugAvailable } from "@/services/community";
 import type { CommunityTheme, CreateCommunityForm } from "@/types";
+import { useCheckSlugAvailableMutation, useCreateCommunityMutation } from "@/queries/hooks";
 
 const THEMES: { id: CommunityTheme; label: string; color: string; bgImage: string }[] = [
   {
@@ -50,6 +50,8 @@ export default function CreateCommunityPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const toast = useToast();
+  const checkSlug = useCheckSlugAvailableMutation();
+  const createCommunity = useCreateCommunityMutation();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -66,7 +68,6 @@ export default function CreateCommunityPage() {
     theme: "default",
   });
   const [slugError, setSlugError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateSlugLocal = (value: string): boolean => {
     if (!value) { setSlugError("도메인을 입력해주세요."); return false; }
@@ -85,7 +86,7 @@ export default function CreateCommunityPage() {
         return;
       }
       try {
-        const available = await checkSlugAvailable(form.slug);
+        const available = await checkSlug.mutateAsync(form.slug);
         if (!available) {
           setSlugError("이미 사용 중인 도메인입니다.");
           return;
@@ -105,15 +106,12 @@ export default function CreateCommunityPage() {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const community = await createCommunityAPI(form);
+      const community = await createCommunity.mutateAsync(form);
       toast.success(`"${community.name}" 커뮤니티가 생성되었습니다!`);
       router.push(`/${community.slug}/admin`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "커뮤니티 생성 중 오류가 발생했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -241,7 +239,7 @@ export default function CreateCommunityPage() {
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={createCommunity.isPending}
               sx={{
                 flex: 2,
                 py: 1.5,
@@ -252,7 +250,7 @@ export default function CreateCommunityPage() {
                 fontSize: "0.9rem",
               }}
             >
-              {isSubmitting ? "생성 중..." : "커뮤니티 생성"}
+              {createCommunity.isPending ? "생성 중..." : "커뮤니티 생성"}
             </Button>
           </div>
         </div>
