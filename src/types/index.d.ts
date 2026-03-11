@@ -5,5 +5,6 @@ export type { Comment } from "./comment";
 export type { Member } from "./member";
 export type { CommunityEvent, CreateEventForm } from "./event";
 export type { Notification, NotificationType } from "./notification";
+export type { Invitation, CreateInvitationResult } from "./invitation";
 export type { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from "./api";
 export type { AuthState, AuthContextValue, SignupProfileForm, SocialProvider } from "./auth";

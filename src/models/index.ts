@@ -6,6 +6,7 @@ export { default as CommentModel } from "./Comment";
 export { default as MemberModel } from "./Member";
 export { default as EventModel } from "./Event";
 export { default as NotificationModel } from "./Notification";
+export { default as InvitationModel } from "./Invitation";
 
 export type { IUser } from "./User";
 export type { ICommunity } from "./Community";
@@ -15,3 +16,4 @@ export type { IComment } from "./Comment";
 export type { IMember } from "./Member";
 export type { IEvent } from "./Event";
 export type { INotification } from "./Notification";
+export type { IInvitation } from "./Invitation";
