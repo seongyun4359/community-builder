@@ -34,7 +34,10 @@ export default function BoardDetailPage() {
   }, [community.slug, boardId]);
 
   useEffect(() => {
-    loadPosts();
+    const id = setTimeout(() => {
+      loadPosts();
+    }, 0);
+    return () => clearTimeout(id);
   }, [loadPosts]);
 
   return (
