@@ -20,6 +20,7 @@ const theme = createTheme({
     h6: { fontFamily: "GmarketSans, sans-serif" },
   },
   palette: {
+    // MUI는 var() 미지원 → globals.css :root 기본값과 동일한 hex 사용
     primary: { main: "#00BEFF", contrastText: "#ffffff" },
     secondary: { main: "#ECE1FF", contrastText: "#191f28" },
     error: { main: "#f04452" },

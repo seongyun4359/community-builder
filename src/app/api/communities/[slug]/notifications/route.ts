@@ -6,14 +6,14 @@ import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: { slug: string } }
 ) {
   try {
     const auth = await requireAuth(request);
     if (auth instanceof Response) return auth;
 
     await connectDB();
-    const { slug } = await params;
+    const { slug } = params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
 
@@ -36,14 +36,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: { slug: string } }
 ) {
   try {
     const auth = await requireAuth(request);
     if (auth instanceof Response) return auth;
 
     await connectDB();
-    const { slug } = await params;
+    const { slug } = params;
     const community = await CommunityModel.findOne({ slug });
     if (!community) return errorResponse("커뮤니티를 찾을 수 없습니다.", 404);
 

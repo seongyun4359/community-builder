@@ -95,3 +95,37 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--background);
   }
 }
+
+/* 커뮤니티 테마 (data-theme은 [communityId] 레이아웃에서 적용) */
+[data-theme="default"] {
+  --primary: #00BEFF;
+  --primary-foreground: #ffffff;
+  --accent: #ECE1FF;
+}
+[data-theme="minimal"] {
+  --primary: #191f28;
+  --primary-foreground: #ffffff;
+  --accent: #e8e8e8;
+}
+[data-theme="vibrant"] {
+  --primary: #f04452;
+  --primary-foreground: #ffffff;
+  --accent: #ffd4d8;
+}
+[data-theme="dark"] {
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --accent: #1a1a2e;
+  --background: #0f0f1a;
+  --foreground: #e4e4e7;
+  --muted: #1a1a2e;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
+  --card: #18181b;
+  --card-foreground: #e4e4e7;
+}
+[data-theme="nature"] {
+  --primary: #2d6a4f;
+  --primary-foreground: #ffffff;
+  --accent: #b7e4c7;
+}

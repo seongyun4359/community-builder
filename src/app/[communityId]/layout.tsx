@@ -31,10 +31,12 @@ export default function CommunityLayout({
   }
 
   return (
-    <CommunityContext.Provider value={community}>
-      <AppShell>
-        {children}
-      </AppShell>
-    </CommunityContext.Provider>
+    <div data-theme={community.theme}>
+      <CommunityContext.Provider value={community}>
+        <AppShell>
+          {children}
+        </AppShell>
+      </CommunityContext.Provider>
+    </div>
   );
 }
