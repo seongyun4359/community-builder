@@ -18,7 +18,7 @@ const TYPE_LABELS: Record<string, string> = {
 export default function NotificationsPage() {
   const community = useCommunity();
   const { user } = useAuth();
-  const { data: notifications, isLoading } = useNotificationsQuery(community.slug, !!user);
+  const { data: notifications, isLoading, isError } = useNotificationsQuery(community.slug, !!user);
   const unreadCount = useMemo(() => (notifications ?? []).filter((n) => !n.isRead).length, [notifications]);
   const markAll = useMarkAllNotificationsReadMutation(community.slug);
   const markOne = useMarkNotificationReadMutation(community.slug);
@@ -45,13 +45,28 @@ export default function NotificationsPage() {
     );
   }
 
-  if (isLoading || !notifications) {
+  if (isLoading) {
     return (
       <div className="flex flex-col gap-3 px-4 py-6">
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col gap-4 px-4 py-6">
+        <h1 className="text-lg font-bold">알림</h1>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <Bell className="h-10 w-10 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">알림을 불러오지 못했습니다.</p>
+          <p className="text-xs text-muted-foreground">잠시 후 다시 시도해주세요.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const safeNotifications = notifications ?? [];
 
   return (
     <div className="flex flex-col gap-4 px-4 py-6">
@@ -65,7 +80,7 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {notifications.length === 0 ? (
+      {safeNotifications.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16">
           <Bell className="h-10 w-10 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">새로운 알림이 없습니다</p>
@@ -73,7 +88,7 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-1">
-          {notifications.map((n) => (
+          {safeNotifications.map((n) => (
             <button
               key={n.id}
               onClick={() => handleRead(n)}

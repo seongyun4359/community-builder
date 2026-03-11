@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/useToast";
 import { usePostListQuery } from "@/queries/hooks";
 
 export default function MyPage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const community = useCommunity();
   const toast = useToast();
 
@@ -25,6 +25,15 @@ export default function MyPage() {
     logout();
     toast.success("로그아웃되었습니다.");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 px-4 py-16">
+        <div className="h-14 w-40 animate-pulse rounded-xl bg-muted" />
+        <div className="h-10 w-full animate-pulse rounded-xl bg-muted" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (
