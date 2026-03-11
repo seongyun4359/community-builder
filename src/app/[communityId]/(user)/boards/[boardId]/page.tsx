@@ -19,7 +19,6 @@ export default function BoardDetailPage() {
 
   const [board, setBoard] = useState<Board | null>(null);
   const [result, setResult] = useState<PostListResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const loadPosts = useCallback(async () => {
     try {
@@ -35,7 +34,7 @@ export default function BoardDetailPage() {
   }, [community.slug, boardId]);
 
   useEffect(() => {
-    loadPosts().finally(() => setIsLoading(false));
+    loadPosts();
   }, [loadPosts]);
 
   return (
@@ -57,11 +56,11 @@ export default function BoardDetailPage() {
         )}
       </div>
 
-      {isLoading ? (
+      {!result ? (
         <div className="flex flex-col gap-2">
           {[1, 2, 3].map((i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />)}
         </div>
-      ) : !result?.posts.length ? (
+      ) : !result.posts.length ? (
         <div className="flex flex-col items-center gap-3 py-20">
           <MessageSquare className="h-10 w-10 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">아직 게시글이 없습니다</p>
