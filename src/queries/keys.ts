@@ -18,5 +18,6 @@ export const qk = {
   notifications: (slug: string) => ["notifications", slug] as const,
   members: (slug: string) => ["members", slug] as const,
   events: (slug: string) => ["events", slug] as const,
+  inviteInfo: (token: string) => ["invite", token] as const,
 };
 

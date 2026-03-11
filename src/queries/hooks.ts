@@ -5,11 +5,19 @@ import { qk } from "@/queries/keys";
 import { checkSlugAvailable, createCommunityAPI, fetchBoardsBySlug, fetchCommunitiesByOwner, fetchCommunityBySlug } from "@/services/community";
 import { fetchPosts, fetchPost, createPost, deletePost, togglePin, type PostListResult } from "@/services/post";
 import { fetchNotifications, markAllAsRead, markAsRead } from "@/services/notification";
-import { fetchMembers } from "@/services/member";
+import {
+  fetchMembers,
+  updateMemberRole,
+  expelMember,
+  createInvite,
+  getInviteInfo,
+  acceptInvite,
+} from "@/services/member";
 import { createEvent, fetchEvents } from "@/services/event";
 import { fetchMe } from "@/services/auth";
-import type { Community, Board, Post, Notification, User } from "@/types";
+import type { Community, Board, Post, Notification, User, UserRole } from "@/types";
 import type { CommunityEvent, CreateCommunityForm, CreateEventForm, CreatePostForm } from "@/types";
+import type { CreateInvitationResult } from "@/types/invitation";
 
 export function useCommunityQuery(slug: string) {
   return useQuery<Community | null>({
@@ -72,6 +80,14 @@ export function useMembersQuery(slug: string) {
   return useQuery({
     queryKey: qk.members(slug),
     queryFn: () => fetchMembers(slug),
+  });
+}
+
+export function useInviteInfoQuery(token: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: qk.inviteInfo(token ?? ""),
+    queryFn: () => getInviteInfo(token!),
+    enabled: !!token && enabled,
   });
 }
 
@@ -156,6 +172,45 @@ export function useCreateEventMutation(slug: string) {
     mutationFn: (form: CreateEventForm) => createEvent(slug, form),
     onSuccess: (evt) => {
       qc.setQueryData<CommunityEvent[]>(qk.events(slug), (prev) => (prev ? [evt, ...prev] : [evt]));
+    },
+  });
+}
+
+export function useUpdateMemberRoleMutation(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: UserRole }) =>
+      updateMemberRole(slug, userId, role),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.members(slug) });
+    },
+  });
+}
+
+export function useExpelMemberMutation(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => expelMember(slug, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.members(slug) });
+      qc.invalidateQueries({ queryKey: qk.community(slug) });
+    },
+  });
+}
+
+export function useCreateInviteMutation(slug: string) {
+  return useMutation({
+    mutationFn: (options?: Parameters<typeof createInvite>[1]) => createInvite(slug, options),
+  });
+}
+
+export function useAcceptInviteMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) => acceptInvite(token),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: qk.community(data.communitySlug) });
+      qc.invalidateQueries({ queryKey: qk.members(data.communitySlug) });
     },
   });
 }
