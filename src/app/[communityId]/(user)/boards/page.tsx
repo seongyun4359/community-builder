@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, MessageSquare } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
-import { fetchBoardsBySlug } from "@/services/community";
 import type { Board } from "@/types";
+import { useBoardsQuery } from "@/queries/hooks";
 
 export default function BoardsPage() {
   const community = useCommunity();
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchBoardsBySlug(community.slug)
-      .then(setBoards)
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
-  }, [community.slug]);
+  const { data: boards = [], isLoading } = useBoardsQuery(community.slug);
 
   if (isLoading) {
     return (

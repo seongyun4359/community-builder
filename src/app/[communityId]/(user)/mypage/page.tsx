@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Avatar from "@mui/material/Avatar";
@@ -8,22 +8,18 @@ import { ChevronRight, FileText, MessageSquare, Settings, LogOut } from "lucide-
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useToast } from "@/hooks/useToast";
-import { fetchPosts } from "@/services/post";
+import { usePostListQuery } from "@/queries/hooks";
 
 export default function MyPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const community = useCommunity();
   const toast = useToast();
-  const [postCount, setPostCount] = useState(0);
 
   const isOwner = user?.id === community.ownerId;
 
-  useEffect(() => {
-    if (!user) return;
-    fetchPosts(community.slug, { authorId: user.id, limit: 1 })
-      .then((r) => setPostCount(r.total))
-      .catch(() => {});
-  }, [community.slug, user]);
+  const authorId = user?.id;
+  const { data: myPosts } = usePostListQuery(community.slug, { authorId, limit: 1 }, { enabled: !!authorId });
+  const postCount = useMemo(() => (myPosts?.total ?? 0), [myPosts?.total]);
 
   const handleLogout = () => {
     logout();

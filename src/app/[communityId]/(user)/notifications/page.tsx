@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Bell, Check } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchNotifications, markAllAsRead, markAsRead } from "@/services/notification";
 import type { Notification } from "@/types";
 import { Skeleton } from "@/components/ui/Loading";
+import { useMarkAllNotificationsReadMutation, useMarkNotificationReadMutation, useNotificationsQuery } from "@/queries/hooks";
 
 const TYPE_LABELS: Record<string, string> = {
   notice: "공지",
@@ -18,27 +18,19 @@ const TYPE_LABELS: Record<string, string> = {
 export default function NotificationsPage() {
   const community = useCommunity();
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[] | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    fetchNotifications(community.slug)
-      .then(setNotifications)
-      .catch(() => setNotifications([]));
-  }, [community.slug, user]);
-
-  const unreadCount = (notifications ?? []).filter((n) => !n.isRead).length;
+  const { data: notifications, isLoading } = useNotificationsQuery(community.slug, !!user);
+  const unreadCount = useMemo(() => (notifications ?? []).filter((n) => !n.isRead).length, [notifications]);
+  const markAll = useMarkAllNotificationsReadMutation(community.slug);
+  const markOne = useMarkNotificationReadMutation(community.slug);
 
   const handleMarkAll = async () => {
     if (!user) return;
-    await markAllAsRead(community.slug);
-    setNotifications((prev) => (prev ?? []).map((n) => ({ ...n, isRead: true })));
+    await markAll.mutateAsync();
   };
 
   const handleRead = async (n: Notification) => {
     if (n.isRead) return;
-    await markAsRead(community.slug, n.id);
-    setNotifications((prev) => (prev ?? []).map((item) => item.id === n.id ? { ...item, isRead: true } : item));
+    await markOne.mutateAsync(n.id);
   };
 
   if (!user) {
@@ -53,7 +45,7 @@ export default function NotificationsPage() {
     );
   }
 
-  if (!notifications) {
+  if (isLoading || !notifications) {
     return (
       <div className="flex flex-col gap-3 px-4 py-6">
         {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}

@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, Bell, Users, CalendarDays, Eye, MessageSquare, ArrowRight } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
-import { fetchBoardsBySlug } from "@/services/community";
-import { fetchPosts } from "@/services/post";
-import type { Board, Post } from "@/types";
+import type { Post } from "@/types";
+import { useBoardsQuery, usePostListQuery } from "@/queries/hooks";
 
 export default function CommunityHomePage() {
   const community = useCommunity();
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    fetchBoardsBySlug(community.slug).then(setBoards).catch(() => {});
-    fetchPosts(community.slug, { limit: 5 })
-      .then((r) => setRecentPosts(r.posts))
-      .catch(() => {});
-  }, [community.slug]);
+  const { data: boards = [] } = useBoardsQuery(community.slug);
+  const { data: recent } = usePostListQuery(community.slug, { limit: 5 });
+  const recentPosts: Post[] = recent?.posts ?? [];
 
   return (
     <div className="flex flex-col gap-6 px-4 py-6">

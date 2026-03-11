@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
 import { Crown, Shield, Users } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
-import { fetchMembers } from "@/services/member";
-import type { Member } from "@/types";
 import { Skeleton } from "@/components/ui/Loading";
+import { useMembersQuery } from "@/queries/hooks";
 
 const ROLE_LABELS: Record<string, string> = {
   super_admin: "최고 관리자",
@@ -19,15 +17,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function MembersPage() {
   const community = useCommunity();
-  const [members, setMembers] = useState<Member[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchMembers(community.slug)
-      .then(setMembers)
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
-  }, [community.slug]);
+  const { data: members = [], isLoading } = useMembersQuery(community.slug);
 
   if (isLoading) {
     return (

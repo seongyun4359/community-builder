@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, Eye, MessageSquare, Pin } from "lucide-react";
 import Button from "@mui/material/Button";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchBoardsBySlug } from "@/services/community";
-import { fetchPosts, type PostListResult } from "@/services/post";
-import type { Board, Post } from "@/types";
+import type { Post } from "@/types";
+import { useBoardsQuery, usePostListQuery } from "@/queries/hooks";
 
 export default function BoardDetailPage() {
   const community = useCommunity();
@@ -17,28 +15,9 @@ export default function BoardDetailPage() {
   const params = useParams();
   const boardId = params.boardId as string;
 
-  const [board, setBoard] = useState<Board | null>(null);
-  const [result, setResult] = useState<PostListResult | null>(null);
-
-  const loadPosts = useCallback(async () => {
-    try {
-      const data = await fetchPosts(community.slug, { boardId });
-      setResult(data);
-    } catch { /* empty */ }
-  }, [community.slug, boardId]);
-
-  useEffect(() => {
-    fetchBoardsBySlug(community.slug).then((boards) => {
-      setBoard(boards.find((b) => b.id === boardId) || null);
-    }).catch(() => {});
-  }, [community.slug, boardId]);
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      loadPosts();
-    }, 0);
-    return () => clearTimeout(id);
-  }, [loadPosts]);
+  const { data: boards = [] } = useBoardsQuery(community.slug);
+  const board = boards.find((b) => b.id === boardId) ?? null;
+  const { data: result } = usePostListQuery(community.slug, { boardId });
 
   return (
     <div className="flex flex-col gap-4 px-4 py-6">

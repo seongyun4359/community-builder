@@ -10,7 +10,7 @@ import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
-import { createPost } from "@/services/post";
+import { useCreatePostMutation } from "@/queries/hooks";
 
 const TITLE_MAX = 60;
 const CONTENT_MAX = 5000;
@@ -22,10 +22,10 @@ export default function WritePostPage() {
   const router = useRouter();
   const params = useParams();
   const boardId = params.boardId as string;
+  const createMutation = useCreatePostMutation(community.slug);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({ title: false, content: false });
 
   if (!isAuthenticated || !user) {
@@ -45,15 +45,12 @@ export default function WritePostPage() {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      const post = await createPost(community.slug, { boardId, title, content });
+      const post = await createMutation.mutateAsync({ boardId, title, content });
       toast.success("게시글이 등록되었습니다.");
       router.push(`/${community.slug}/posts/${post.id}`);
     } catch {
       toast.error("게시글 등록에 실패했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -105,7 +102,7 @@ export default function WritePostPage() {
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={isSubmitting || !!titleError || !!contentError}
+          disabled={createMutation.isPending || !!titleError || !!contentError}
           sx={{
             py: 1.5,
             borderRadius: "12px",
@@ -115,7 +112,7 @@ export default function WritePostPage() {
             fontSize: "0.9rem",
           }}
         >
-          {isSubmitting ? "등록 중..." : "게시글 등록"}
+          {createMutation.isPending ? "등록 중..." : "게시글 등록"}
         </Button>
       </div>
     </div>

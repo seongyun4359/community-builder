@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Avatar from "@mui/material/Avatar";
@@ -8,8 +8,7 @@ import { ArrowLeft, Eye, MessageSquare, Heart, Trash2 } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
-import { fetchPost, deletePost } from "@/services/post";
-import type { Post } from "@/types";
+import { useDeletePostMutation, usePostQuery } from "@/queries/hooks";
 
 export default function PostDetailPage() {
   const community = useCommunity();
@@ -19,23 +18,19 @@ export default function PostDetailPage() {
   const params = useParams();
   const postId = params.postId as string;
 
-  const [post, setPost] = useState<Post | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: post, isLoading, isError } = usePostQuery(community.slug, postId);
+  const deleteMutation = useDeletePostMutation(community.slug);
 
   useEffect(() => {
-    fetchPost(community.slug, postId)
-      .then(setPost)
-      .catch(() => {
-        toast.error("게시글을 찾을 수 없습니다.");
-        router.back();
-      })
-      .finally(() => setIsLoading(false));
-  }, [community.slug, postId, router, toast]);
+    if (!isError) return;
+    toast.error("게시글을 찾을 수 없습니다.");
+    router.back();
+  }, [isError, router, toast]);
 
   const handleDelete = async () => {
     if (!post || !confirm("이 게시글을 삭제할까요?")) return;
     try {
-      await deletePost(community.slug, post.id);
+      await deleteMutation.mutateAsync(post.id);
       toast.success("게시글이 삭제되었습니다.");
       router.back();
     } catch {

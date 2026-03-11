@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarDays, MapPin, Plus, Users } from "lucide-react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -8,9 +8,8 @@ import FormError from "@/components/ui/FormError";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
-import { fetchEvents, createEvent } from "@/services/event";
-import type { CommunityEvent } from "@/types";
 import { Skeleton } from "@/components/ui/Loading";
+import { useCreateEventMutation, useEventsQuery } from "@/queries/hooks";
 
 const TITLE_MAX = 40;
 const DESCRIPTION_MAX = 300;
@@ -21,11 +20,10 @@ export default function EventsPage() {
   const { user } = useAuth();
   const toast = useToast();
 
-  const [events, setEvents] = useState<CommunityEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: events = [], isLoading } = useEventsQuery(community.slug);
+  const createMutation = useCreateEventMutation(community.slug);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", location: "", startDate: "", maxParticipants: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({ title: false, startDate: false });
 
   const titleError = !form.title.trim()
@@ -36,13 +34,6 @@ export default function EventsPage() {
 
   const startDateError = !form.startDate ? "날짜를 선택해주세요." : "";
 
-  useEffect(() => {
-    fetchEvents(community.slug)
-      .then(setEvents)
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
-  }, [community.slug]);
-
   const handleCreate = async () => {
     setTouched({ title: true, startDate: true });
     if (titleError || startDateError) {
@@ -51,25 +42,23 @@ export default function EventsPage() {
     }
     if (!user) { toast.error("로그인이 필요합니다."); return; }
 
-    setIsSubmitting(true);
     try {
-      const newEvent = await createEvent(community.slug, {
+      await createMutation.mutateAsync({
         title: form.title.trim(),
         description: form.description.trim(),
         location: form.location || undefined,
         startDate: form.startDate,
         maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
       });
-      setEvents((prev) => [newEvent, ...prev]);
       setShowForm(false);
       setForm({ title: "", description: "", location: "", startDate: "", maxParticipants: "" });
       toast.success("모임이 생성되었습니다.");
     } catch {
       toast.error("모임 생성에 실패했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const canSubmit = useMemo(() => !createMutation.isPending, [createMutation.isPending]);
 
   return (
     <div className="flex flex-col gap-4 px-4 py-6">
@@ -145,9 +134,9 @@ export default function EventsPage() {
           <div className="flex justify-end gap-2">
             <Button variant="outlined" size="small" onClick={() => setShowForm(false)}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit" }}>취소</Button>
-            <Button variant="contained" size="small" onClick={handleCreate} disabled={isSubmitting}
+            <Button variant="contained" size="small" onClick={handleCreate} disabled={!canSubmit}
               sx={{ borderRadius: "10px", textTransform: "none", fontFamily: "inherit", fontWeight: 600 }}>
-              {isSubmitting ? "생성 중..." : "만들기"}
+              {createMutation.isPending ? "생성 중..." : "만들기"}
             </Button>
           </div>
         </div>
