@@ -54,7 +54,7 @@ export default function AdminLayout({
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="flex h-14 items-center gap-3 px-4">
           <Link
             href={`/${community.slug}`}
@@ -69,41 +69,47 @@ export default function AdminLayout({
         </div>
       </header>
 
-      <div className="flex overflow-x-auto border-b border-border bg-background px-2">
-        {ADMIN_NAV.map((item) => {
-          const href = basePath + item.path;
-          const isActive = item.path === ""
-            ? pathname === basePath
-            : pathname.startsWith(href);
-          const Icon = item.icon;
-
-          return (
-            <Link
-              key={item.path}
-              href={href}
-              className={cn(
-                "flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-xs font-medium transition-colors",
-                isActive
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <motion.span
-                animate={{ scale: isActive ? 1.03 : 1, opacity: isActive ? 1 : 0.9 }}
-                transition={{ duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
-                className="flex items-center gap-1.5"
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </motion.span>
-            </Link>
-          );
-        })}
-      </div>
-
-      <main className="flex-1 px-4 py-6">
+      <main className="flex min-h-[calc(100vh-56px)] flex-col pb-20 px-4 pt-4">
         <PageTransition>{children}</PageTransition>
       </main>
+
+      <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-(--width-app) -translate-x-1/2 border-t border-border bg-background/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 items-center justify-around px-4">
+          {ADMIN_NAV.map((item) => {
+            const href = basePath + item.path;
+            const isActive =
+              item.path === ""
+                ? pathname === basePath
+                : pathname.startsWith(href);
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.path}
+                href={href}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 text-[11px] font-medium text-muted-foreground transition-colors",
+                  isActive && "text-primary"
+                )}
+              >
+                <motion.div
+                  whileTap={{ scale: 0.92 }}
+                  animate={{
+                    scale: isActive ? 1.06 : 1,
+                    opacity: isActive ? 1 : 0.9,
+                    y: isActive ? -1 : 0,
+                  }}
+                  transition={{ duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
+                  className="flex flex-col items-center gap-0.5"
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </motion.div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }
