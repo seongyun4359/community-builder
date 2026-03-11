@@ -1,6 +1,7 @@
 "use client";
 
 export const qk = {
+  me: ["me"] as const,
   community: (slug: string) => ["community", slug] as const,
   communitiesByOwner: (ownerId: string) => ["communities", "owner", ownerId] as const,
   boards: (slug: string) => ["boards", slug] as const,

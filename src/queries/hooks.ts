@@ -7,13 +7,22 @@ import { fetchPosts, fetchPost, createPost, deletePost, togglePin, type PostList
 import { fetchNotifications, markAllAsRead, markAsRead } from "@/services/notification";
 import { fetchMembers } from "@/services/member";
 import { createEvent, fetchEvents } from "@/services/event";
-import type { Community, Board, Post, Notification } from "@/types";
+import { fetchMe } from "@/services/auth";
+import type { Community, Board, Post, Notification, User } from "@/types";
 import type { CommunityEvent, CreateCommunityForm, CreateEventForm, CreatePostForm } from "@/types";
 
 export function useCommunityQuery(slug: string) {
   return useQuery<Community | null>({
     queryKey: qk.community(slug),
     queryFn: () => fetchCommunityBySlug(slug),
+  });
+}
+
+export function useMeQuery(options?: { enabled?: boolean }) {
+  return useQuery<User | null>({
+    queryKey: qk.me,
+    queryFn: () => fetchMe(),
+    enabled: options?.enabled,
   });
 }
 
