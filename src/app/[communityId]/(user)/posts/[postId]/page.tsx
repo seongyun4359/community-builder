@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import Avatar from "@mui/material/Avatar";
 import { ArrowLeft, Eye, MessageSquare, Heart, Trash2 } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
