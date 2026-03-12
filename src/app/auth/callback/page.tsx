@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -11,8 +11,13 @@ function CallbackContent() {
   const searchParams = useSearchParams();
   const toast = useToast();
   const { refetch } = useMeQuery({ enabled: false });
+  const ran = useRef(false);
 
   useEffect(() => {
+    // React StrictMode(개발)에서 effect가 2번 실행될 수 있어, 로그인 토스트/리다이렉트 중복을 방지합니다.
+    if (ran.current) return;
+    ran.current = true;
+
     const isSignup = searchParams.get("signup") === "true";
 
     refetch()
