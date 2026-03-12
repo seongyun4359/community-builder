@@ -15,7 +15,7 @@ export default function CommunityUserLayout({
   return (
     <>
       <CommunityHeader />
-      <main className="flex-1 pb-20">
+      <main className="flex flex-1 flex-col pb-20">
         <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav basePath={`/${community.slug}`} />

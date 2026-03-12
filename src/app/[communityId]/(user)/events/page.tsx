@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CalendarDays, MapPin, Plus, Users } from "lucide-react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -19,6 +20,7 @@ export default function EventsPage() {
   const community = useCommunity();
   const { user } = useAuth();
   const toast = useToast();
+  const router = useRouter();
 
   const { data: events = [], isLoading } = useEventsQuery(community.slug);
   const createMutation = useCreateEventMutation(community.slug);
@@ -200,7 +202,12 @@ export default function EventsPage() {
       ) : (
         <div className="flex flex-col gap-2">
           {events.map((evt) => (
-            <div key={evt.id} className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4">
+            <button
+              key={evt.id}
+              type="button"
+              onClick={() => router.push(`/${community.slug}/events/${evt.id}/chat`)}
+              className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/60"
+            >
               <span className="text-sm font-semibold">{evt.title}</span>
               {evt.description && <span className="text-xs text-muted-foreground">{evt.description}</span>}
               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
@@ -216,7 +223,7 @@ export default function EventsPage() {
                   {evt.participantCount}{evt.maxParticipants ? `/${evt.maxParticipants}` : ""}명
                 </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}

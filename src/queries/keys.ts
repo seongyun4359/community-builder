@@ -20,6 +20,8 @@ export const qk = {
   notifications: (slug: string) => ["notifications", slug] as const,
   members: (slug: string) => ["members", slug] as const,
   events: (slug: string) => ["events", slug] as const,
+  event: (slug: string, eventId: string) => ["event", slug, eventId] as const,
   inviteInfo: (token: string) => ["invite", token] as const,
+  chat: (slug: string, eventId: string) => ["chat", slug, eventId] as const,
 };
 

@@ -15,10 +15,11 @@ import {
   acceptInvite,
 } from "@/services/member";
 import { createEvent, fetchEvents } from "@/services/event";
+import { fetchEvent } from "@/services/event";
+import { fetchChat, sendMessage, type ChatRoomResult } from "@/services/chat";
 import { fetchMe } from "@/services/auth";
 import type { Community, Board, Post, Notification, User, UserRole, Comment } from "@/types";
 import type { CommunityEvent, CreateCommunityForm, CreateEventForm, CreatePostForm } from "@/types";
-import type { CreateInvitationResult } from "@/types/invitation";
 
 export function useCommunityQuery(slug: string) {
   return useQuery<Community | null>({
@@ -112,6 +113,32 @@ export function useEventsQuery(slug: string) {
   return useQuery<CommunityEvent[]>({
     queryKey: qk.events(slug),
     queryFn: () => fetchEvents(slug),
+  });
+}
+
+export function useEventQuery(slug: string, eventId: string, enabled: boolean) {
+  return useQuery<CommunityEvent>({
+    queryKey: qk.event(slug, eventId),
+    queryFn: () => fetchEvent(slug, eventId),
+    enabled: !!slug && !!eventId && enabled,
+  });
+}
+
+export function useChatQuery(slug: string, eventId: string, enabled: boolean) {
+  return useQuery<ChatRoomResult>({
+    queryKey: qk.chat(slug, eventId),
+    queryFn: () => fetchChat(slug, eventId),
+    enabled: !!slug && !!eventId && enabled,
+  });
+}
+
+export function useSendMessageMutation(slug: string, eventId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (content: string) => sendMessage(slug, eventId, content),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.chat(slug, eventId) });
+    },
   });
 }
 

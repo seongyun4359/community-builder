@@ -8,6 +8,8 @@ export { default as MemberModel } from "./Member";
 export { default as EventModel } from "./Event";
 export { default as NotificationModel } from "./Notification";
 export { default as InvitationModel } from "./Invitation";
+export { default as ChatRoomModel } from "./ChatRoom";
+export { default as ChatMessageModel } from "./ChatMessage";
 
 export type { IUser } from "./User";
 export type { ICommunity } from "./Community";
@@ -19,3 +21,5 @@ export type { IMember } from "./Member";
 export type { IEvent } from "./Event";
 export type { INotification } from "./Notification";
 export type { IInvitation } from "./Invitation";
+export type { IChatRoom } from "./ChatRoom";
+export type { IChatMessage } from "./ChatMessage";
