@@ -11,6 +11,7 @@ export default function CommunityHomePage() {
   const { data: boards = [] } = useBoardsQuery(community.slug);
   const { data: recent } = usePostListQuery(community.slug, { limit: 5 });
   const recentPosts: Post[] = recent?.posts ?? [];
+  const noticeBoard = boards.find((b) => b.type === "notice");
 
   return (
     <div className="flex flex-col gap-6 px-4 py-6">
@@ -31,7 +32,7 @@ export default function CommunityHomePage() {
         <h2 className="text-sm font-semibold text-muted-foreground">빠른 메뉴</h2>
         <div className="grid grid-cols-4 gap-2">
           <QuickMenu icon={<FileText className="h-5 w-5" />} label="게시판" href={`/${community.slug}/boards`} />
-          <QuickMenu icon={<Bell className="h-5 w-5" />} label="공지" href={`/${community.slug}/boards`} />
+          <QuickMenu icon={<Bell className="h-5 w-5" />} label="공지" href={noticeBoard ? `/${community.slug}/boards/${noticeBoard.id}` : `/${community.slug}/boards`} />
           <QuickMenu icon={<CalendarDays className="h-5 w-5" />} label="모임" href={`/${community.slug}/events`} />
           <QuickMenu icon={<Users className="h-5 w-5" />} label="멤버" href={`/${community.slug}/members`} />
         </div>

@@ -50,10 +50,32 @@ export async function deletePost(slug: string, postId: string): Promise<void> {
   await apiFetch(`/api/communities/${slug}/posts/${postId}`, { method: "DELETE" });
 }
 
+export async function updatePost(
+  slug: string,
+  postId: string,
+  payload: { title?: string; content?: string; images?: string[] }
+): Promise<Post> {
+  const data = await apiFetch<Post & { _id: string }>(`/api/communities/${slug}/posts/${postId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return normalizeId(data);
+}
+
 export async function togglePin(slug: string, postId: string, isPinned: boolean): Promise<Post> {
   const data = await apiFetch<Post & { _id: string }>(`/api/communities/${slug}/posts/${postId}`, {
     method: "PUT",
     body: JSON.stringify({ isPinned }),
   });
   return normalizeId(data);
+}
+
+export async function getPostLike(slug: string, postId: string): Promise<{ liked: boolean }> {
+  return apiFetch<{ liked: boolean }>(`/api/communities/${slug}/posts/${postId}/like`);
+}
+
+export async function togglePostLike(slug: string, postId: string): Promise<{ liked: boolean; likeCount: number }> {
+  return apiFetch<{ liked: boolean; likeCount: number }>(`/api/communities/${slug}/posts/${postId}/like`, {
+    method: "POST",
+  });
 }
