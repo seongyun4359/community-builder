@@ -28,7 +28,6 @@ const InvitationSchema = new Schema<IInvitation>(
   { timestamps: true }
 );
 
-InvitationSchema.index({ token: 1 });
 InvitationSchema.index({ communityId: 1, createdBy: 1 });
 
 export default mongoose.models.Invitation || mongoose.model<IInvitation>("Invitation", InvitationSchema);

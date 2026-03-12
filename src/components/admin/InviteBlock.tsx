@@ -14,28 +14,31 @@ export default function InviteBlock() {
   const toast = useToast();
   const createInvite = useCreateInviteMutation(community.slug);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [kakaoReady, setKakaoReady] = useState(false);
+  const [kakaoReady, setKakaoReady] = useState<boolean>(() => {
+    if (typeof window === "undefined" || !KAKAO_JS_KEY) return false;
+    const w = window as unknown as {
+      Kakao?: { Share?: { sendDefault: (opts: unknown) => Promise<unknown> } };
+    };
+    return !!w.Kakao?.Share;
+  });
 
   useEffect(() => {
-    if (!KAKAO_JS_KEY) return;
-    const w = window as unknown as { Kakao?: { init: (k: string) => void; Share?: { sendDefault: (opts: unknown) => Promise<unknown> } } };
-    if (typeof window !== "undefined" && w.Kakao?.Share) {
-      setKakaoReady(true);
-      return;
-    }
+    if (!KAKAO_JS_KEY || kakaoReady) return;
     const script = document.createElement("script");
     script.src = "https://t.kakao.com/v2/sdk/js/kakao.min.js";
     script.async = true;
     script.onload = () => {
-      const Kakao = (window as unknown as { Kakao: { init: (key: string) => void } }).Kakao;
-      if (Kakao && KAKAO_JS_KEY) Kakao.init(KAKAO_JS_KEY);
+      const Kakao = (window as unknown as { Kakao: { init: (key: string) => void; Share?: unknown } }).Kakao;
+      if (Kakao && KAKAO_JS_KEY && !Kakao.Share) {
+        Kakao.init(KAKAO_JS_KEY);
+      }
       setKakaoReady(true);
     };
     document.head.appendChild(script);
     return () => {
       document.head.removeChild(script);
     };
-  }, []);
+  }, [kakaoReady]);
 
   const handleCreateLink = async () => {
     try {

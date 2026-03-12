@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { CommunityModel, MemberModel, UserModel } from "@/models";
 import { successResponse, errorResponse } from "@/lib/api-utils";
-import { requireCommunityAdmin, requireCommunityOwner } from "@/lib/api-auth";
+import { requireCommunityAdmin } from "@/lib/api-auth";
 
 export async function GET(
   _request: NextRequest,
