@@ -102,5 +102,3 @@ src/
 
 - **`MONGODB_URI 환경 변수가 설정되지 않았습니다.`**
   - `.env.local`에 `MONGODB_URI`를 설정하세요.
-- **`Made-with: Cursor` 같은 문구가 커밋에 붙음**
-  - 커밋 정책상 금지입니다. 로컬 훅으로 제거하거나(예: `.git/hooks/commit-msg`) 커밋 템플릿/훅 설정을 점검하세요.
