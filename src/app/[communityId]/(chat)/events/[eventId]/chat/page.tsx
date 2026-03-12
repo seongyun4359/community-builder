@@ -1,13 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useEffect } from "react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
-import { useChatQuery, useCreateInviteMutation, useMembersQuery, useSendMessageMutation } from "@/queries/hooks";
+import { useChatQuery, useSendMessageMutation } from "@/queries/hooks";
 import ChatBubble from "@/components/chat/ChatBubble";
 import ChatInput from "@/components/chat/ChatInput";
-import ChatRoomSheet from "@/components/chat/ChatRoomSheet";
 import { Skeleton } from "@/components/ui/Loading";
 import type { ChatMessage } from "@/types";
 
@@ -24,27 +23,9 @@ export default function EventChatPage() {
   const eventId = (Array.isArray(params.eventId) ? params.eventId[0] : params.eventId) as string | undefined;
 
   const listRef = useRef<HTMLDivElement>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetNonce, setSheetNonce] = useState(0);
-  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-
   const safeEventId = eventId ?? "";
   const { data, isLoading, isError } = useChatQuery(community.slug, safeEventId, !!user);
   const sendMessage = useSendMessageMutation(community.slug, safeEventId);
-  const membersQuery = useMembersQuery(community.slug);
-  const createInvite = useCreateInviteMutation(community.slug);
-
-  const myMemberRole = useMemo(() => {
-    if (!user) return null;
-    const list = membersQuery.data as { userId: string; role: string }[] | undefined;
-    return list?.find((m) => m.userId === user.id)?.role ?? null;
-  }, [membersQuery.data, user]);
-
-  const canInvite = useMemo(() => {
-    if (!user) return false;
-    if (user.id === community.ownerId) return true;
-    return myMemberRole === "admin" || myMemberRole === "super_admin";
-  }, [community.ownerId, myMemberRole, user]);
 
   useEffect(() => {
     if (!data?.messages?.length) return;
@@ -134,42 +115,10 @@ export default function EventChatPage() {
         )}
       </div>
 
-      <div className="flex items-center gap-2 border-t border-border bg-background px-3 py-2">
-        <button
-          type="button"
-          onClick={() => {
-            setSheetNonce((n) => n + 1);
-            setSheetOpen(true);
-          }}
-          className="rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-muted"
-        >
-          멤버 · 초대
-        </button>
-        <div className="min-w-0 flex-1" />
-      </div>
-
       <ChatInput
         onSend={handleSend}
         disabled={sendMessage.isPending}
         placeholder="메시지를 입력하세요"
-      />
-
-      <ChatRoomSheet
-        key={sheetNonce}
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        communityName={community.name}
-        ownerId={community.ownerId}
-        meId={user.id}
-        members={membersQuery.data}
-        isMembersLoading={membersQuery.isLoading}
-        canInvite={canInvite}
-        inviteUrl={inviteUrl}
-        isCreatingInvite={createInvite.isPending}
-        onCreateInvite={async () => {
-          const res = await createInvite.mutateAsync({});
-          setInviteUrl(res.inviteUrl);
-        }}
       />
     </div>
   );
