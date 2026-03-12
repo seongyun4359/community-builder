@@ -39,6 +39,7 @@
   --card: #ffffff;
   --card-foreground: #191f28;
   --radius: 12px;
+  --radius-input: 8px;
 }
 
 @theme inline {
@@ -128,4 +129,17 @@ h1, h2, h3, h4, h5, h6 {
   --primary: #2d6a4f;
   --primary-foreground: #ffffff;
   --accent: #b7e4c7;
+}
+
+/* MUI 텍스트 인풋: hover/focus 테마 색상, radius 통일 */
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--primary) !important;
+  opacity: 0.9;
+}
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--primary) !important;
+  border-width: 1.5px !important;
+}
+.MuiOutlinedInput-notchedOutline {
+  border-radius: var(--radius-input) !important;
 }
