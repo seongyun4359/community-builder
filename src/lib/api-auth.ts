@@ -63,6 +63,24 @@ export async function requireCommunityAdmin(
   return { userId: auth.userId, communityId, ownerId };
 }
 
+/** 커뮤니티 멤버인지 확인 (채팅 등 멤버 전용 기능용) */
+export async function requireCommunityMember(
+  request: NextRequest,
+  slug: string
+): Promise<{ userId: string; communityId: string } | Response> {
+  const auth = await requireAuth(request);
+  if (auth instanceof Response) return auth;
+
+  const { community, response } = await requireCommunity(slug);
+  if (response) return response;
+
+  const communityId = community!._id.toString();
+  const member = await MemberModel.findOne({ communityId, userId: auth.userId }).lean();
+  if (!member) return errorResponse("모임 멤버만 이용할 수 있습니다.", 403);
+
+  return { userId: auth.userId, communityId };
+}
+
 export async function requirePostAccess(
   request: NextRequest,
   slug: string,
