@@ -3,7 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@/queries/keys";
 import { checkSlugAvailable, createCommunityAPI, fetchBoardsBySlug, fetchCommunitiesByOwner, fetchCommunityBySlug } from "@/services/community";
-import { fetchPosts, fetchPost, createPost, deletePost, togglePin, type PostListResult } from "@/services/post";
+import { fetchPosts, fetchPost, createPost, deletePost, togglePin, updatePost, getPostLike, togglePostLike, type PostListResult } from "@/services/post";
+import { fetchComments, createComment, deleteComment } from "@/services/comment";
 import { fetchNotifications, markAllAsRead, markAsRead } from "@/services/notification";
 import {
   fetchMembers,
@@ -15,7 +16,7 @@ import {
 } from "@/services/member";
 import { createEvent, fetchEvents } from "@/services/event";
 import { fetchMe } from "@/services/auth";
-import type { Community, Board, Post, Notification, User, UserRole } from "@/types";
+import type { Community, Board, Post, Notification, User, UserRole, Comment } from "@/types";
 import type { CommunityEvent, CreateCommunityForm, CreateEventForm, CreatePostForm } from "@/types";
 import type { CreateInvitationResult } from "@/types/invitation";
 
@@ -65,6 +66,22 @@ export function usePostQuery(slug: string, postId: string) {
   return useQuery<Post>({
     queryKey: qk.post(slug, postId),
     queryFn: () => fetchPost(slug, postId),
+  });
+}
+
+export function usePostLikeQuery(slug: string, postId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: qk.postLike(slug, postId),
+    queryFn: () => getPostLike(slug, postId),
+    enabled: !!slug && !!postId && enabled,
+  });
+}
+
+export function useCommentsQuery(slug: string, postId: string) {
+  return useQuery<Comment[]>({
+    queryKey: qk.comments(slug, postId),
+    queryFn: () => fetchComments(slug, postId),
+    enabled: !!slug && !!postId,
   });
 }
 
@@ -125,6 +142,27 @@ export function useCreateCommunityMutation() {
   });
 }
 
+export function useUpdatePostMutation(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      postId,
+      title,
+      content,
+      images,
+    }: {
+      postId: string;
+      title?: string;
+      content?: string;
+      images?: string[];
+    }) => updatePost(slug, postId, { title, content, images }),
+    onSuccess: (updated) => {
+      qc.invalidateQueries({ queryKey: ["posts", slug] });
+      qc.setQueryData(qk.post(slug, updated.id), updated);
+    },
+  });
+}
+
 export function useDeletePostMutation(slug: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -142,6 +180,47 @@ export function useTogglePinMutation(slug: string) {
     onSuccess: (post) => {
       qc.invalidateQueries({ queryKey: ["posts", slug] });
       qc.setQueryData(qk.post(slug, post.id), post);
+    },
+  });
+}
+
+export function useTogglePostLikeMutation(slug: string, postId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => togglePostLike(slug, postId),
+    onSuccess: (data) => {
+      qc.setQueryData(qk.postLike(slug, postId), { liked: data.liked });
+      qc.setQueryData(qk.post(slug, postId), (prev: Post | undefined) =>
+        prev ? { ...prev, likeCount: data.likeCount } : prev
+      );
+    },
+  });
+}
+
+export function useCreateCommentMutation(slug: string, postId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (content: string) => createComment(slug, postId, content),
+    onSuccess: (newComment) => {
+      qc.setQueryData<Comment[]>(qk.comments(slug, postId), (prev) => (prev ? [...prev, newComment] : [newComment]));
+      qc.setQueryData(qk.post(slug, postId), (prev: Post | undefined) =>
+        prev ? { ...prev, commentCount: (prev.commentCount || 0) + 1 } : prev
+      );
+    },
+  });
+}
+
+export function useDeleteCommentMutation(slug: string, postId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (commentId: string) => deleteComment(slug, postId, commentId),
+    onSuccess: (_, commentId) => {
+      qc.setQueryData<Comment[]>(qk.comments(slug, postId), (prev) =>
+        prev ? prev.filter((c) => c.id !== commentId) : []
+      );
+      qc.setQueryData(qk.post(slug, postId), (prev: Post | undefined) =>
+        prev ? { ...prev, commentCount: Math.max(0, (prev.commentCount || 0) - 1) } : prev
+      );
     },
   });
 }

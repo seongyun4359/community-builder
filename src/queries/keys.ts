@@ -15,6 +15,8 @@ export const qk = {
       params.limit ?? 20,
     ] as const,
   post: (slug: string, postId: string) => ["post", slug, postId] as const,
+  postLike: (slug: string, postId: string) => ["postLike", slug, postId] as const,
+  comments: (slug: string, postId: string) => ["comments", slug, postId] as const,
   notifications: (slug: string) => ["notifications", slug] as const,
   members: (slug: string) => ["members", slug] as const,
   events: (slug: string) => ["events", slug] as const,
