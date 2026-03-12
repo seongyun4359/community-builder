@@ -40,7 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#cursor
-/.cursor/*
-/.cursor/rules/*
-/.cursor/rules/convention.mdc
+# Cursor (rules, state — 로컬 전용, 커밋 제외)
+.cursor/
+.cursorrules
