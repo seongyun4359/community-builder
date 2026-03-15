@@ -17,7 +17,7 @@ export default function CommunityHeader() {
       <div className="flex h-14 items-center justify-between px-4">
         <Link href={`/${community.slug}`} className="flex items-center gap-2">
           <div
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-primary-foreground"
             style={{ backgroundColor: "var(--primary)" }}
           >
             {community.name[0]}

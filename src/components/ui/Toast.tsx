@@ -14,10 +14,10 @@ export interface ToastProps {
 }
 
 const iconMap: Record<ToastType, { icon: typeof CheckCircle2; className: string }> = {
-  success: { icon: CheckCircle2, className: "text-emerald-400" },
-  error: { icon: XCircle, className: "text-red-400" },
-  info: { icon: Info, className: "text-sky-400" },
-  warning: { icon: AlertTriangle, className: "text-amber-400" },
+  success: { icon: CheckCircle2, className: "text-[var(--success)]" },
+  error: { icon: XCircle, className: "text-[var(--destructive)]" },
+  info: { icon: Info, className: "text-[var(--primary)]" },
+  warning: { icon: AlertTriangle, className: "text-[var(--warning)]" },
 };
 
 export default function Toast({
@@ -45,14 +45,14 @@ export default function Toast({
 
   return (
     <div
-      className={`flex items-center gap-2.5 rounded-2xl border border-white/20 bg-black/80 px-4 py-2.5 shadow-lg ring-1 ring-white/10 backdrop-blur-xl transition-all duration-300 ${
+      className={`flex items-center gap-2.5 rounded-2xl border border-border bg-card/95 px-4 py-2.5 text-foreground shadow-lg ring-1 ring-border/50 backdrop-blur-xl transition-all duration-300 ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
       }`}
       role="status"
       aria-live="polite"
     >
       <Icon className={`h-5 w-5 shrink-0 ${iconClass}`} />
-      <span className="whitespace-nowrap text-[13px] font-medium text-white">
+      <span className="whitespace-nowrap text-[13px] font-medium">
         {message}
       </span>
     </div>

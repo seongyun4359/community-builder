@@ -77,7 +77,7 @@ export default function ChatRoomSheet({
         <motion.button
           type="button"
           onClick={onClose}
-          className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
+          className="absolute inset-0 bg-foreground/20 backdrop-blur-[1px]"
           aria-label="닫기"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

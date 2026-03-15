@@ -153,7 +153,7 @@ export default function InviteBlock() {
             </Button>
           </div>
           {showQr && (
-            <div className="flex justify-center rounded-xl border border-border bg-white p-2">
+            <div className="flex justify-center rounded-xl border border-border bg-card p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrSrc} alt="초대 QR 코드" width={200} height={200} className="rounded" />
             </div>

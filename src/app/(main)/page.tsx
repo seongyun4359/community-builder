@@ -71,7 +71,7 @@ export default function HomePage() {
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted"
               >
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-primary-foreground"
                   style={{ backgroundColor: "var(--primary)" }}
                 >
                   {c.name[0]}
